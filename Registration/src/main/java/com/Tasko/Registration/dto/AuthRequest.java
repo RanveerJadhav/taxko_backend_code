@@ -1,5 +1,6 @@
 package com.Tasko.Registration.dto;
 
+
 public class AuthRequest
 {
     private String username ;

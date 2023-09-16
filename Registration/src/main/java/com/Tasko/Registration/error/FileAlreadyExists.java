@@ -2,7 +2,12 @@ package com.Tasko.Registration.error;
 
 public class FileAlreadyExists extends Exception
 {
-    public FileAlreadyExists() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public FileAlreadyExists() {
         super();
     }
 

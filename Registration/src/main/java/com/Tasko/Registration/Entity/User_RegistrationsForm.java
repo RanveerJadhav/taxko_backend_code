@@ -39,6 +39,7 @@ public class User_RegistrationsForm
 	 private String mobile;
 
      //@jakarta.validation.constraints.Email(message = "Enter valid Email")
+	 @Column(unique=true)
      private String email;
 
      private String office_Address;

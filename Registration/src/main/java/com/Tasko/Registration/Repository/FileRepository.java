@@ -2,9 +2,6 @@ package com.Tasko.Registration.Repository;
 
 import com.Tasko.Registration.Entity.FileEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -16,6 +13,8 @@ public interface FileRepository extends JpaRepository<FileEntity, Long>
 
 
     FileEntity findByIdAndUseridAndClientidAndAccountyear(Long id,Long userid, Long clientid,String accountyear);
+
+    List<FileEntity> findByClientidAndAccountyear(Long clientid,String accountyear);
 
 
    // FileEntity findByUserIdAndClientIdAndAccountYearAndFileName(Long userid, Long clientid, String accountyear, String fileName);

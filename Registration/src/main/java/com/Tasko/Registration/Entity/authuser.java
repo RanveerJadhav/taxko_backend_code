@@ -8,9 +8,6 @@ public class authuser
 	private String token;
 	private Optional<User_RegistrationsForm> user;
 
-	public authuser(Optional<User_RegistrationsForm> user) {
-
-	}
 
 
 	public String getToken() {
@@ -29,13 +26,9 @@ public class authuser
 		this.user = user;
 	}
 
-	public authuser(String token, Optional<User_RegistrationsForm> user) {
+	public authuser(Optional<User_RegistrationsForm> user, String token) {
 		this.token = token;
 		this.user = user;
-	}
-
-	public authuser()
-	{
 	}
 }
 

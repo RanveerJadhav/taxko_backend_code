@@ -1,16 +1,15 @@
 package com.Tasko.Registration.error;
 
 import com.Tasko.Registration.Entity.ErrorMessage;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @ControllerAdvice
 @ResponseStatus
@@ -65,4 +64,25 @@ public ResponseEntity<String> handleMaxUploadSizeExceeded() {
 public ResponseEntity<String> handleMultipartException() {
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("File Already Exists");
 }
+
+//    @ExceptionHandler(EmailMandatoryException.class)
+//    public ResponseEntity<String> EmailMandatoryException()
+//    {
+//        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Email Already Exists");
+//    }
+
+    @ExceptionHandler(EmailMandatoryException.class)
+    public ResponseEntity<ErrorMessage> EmailMandatoryException(EmailMandatoryException incorrect,WebRequest request)
+    {
+        ErrorMessage massage=new ErrorMessage(HttpStatus.UNAUTHORIZED,incorrect.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(massage);
+    }
+
+    @ExceptionHandler(ClientNotFoundException.class)
+    public ResponseEntity<ErrorMessage> ClientNotFoundException(ClientNotFoundException clientNotFoundException, WebRequest request)
+    {
+        ErrorMessage massage=new ErrorMessage(HttpStatus.NOT_FOUND,clientNotFoundException.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(massage);
+    }
+
 }

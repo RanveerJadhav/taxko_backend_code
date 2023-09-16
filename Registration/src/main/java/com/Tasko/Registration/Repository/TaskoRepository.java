@@ -12,7 +12,7 @@ import java.util.Optional;
 
 public interface TaskoRepository extends JpaRepository<User_RegistrationsForm,Long>
 {
-    User_RegistrationsForm findByEmail(String email);
+    Optional<User_RegistrationsForm> findByEmail(String email);
    // User_RegistrationsForm findByPan(String pan);
     Optional<User_RegistrationsForm> findByPan(String username);
 

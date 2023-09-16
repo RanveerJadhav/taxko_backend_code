@@ -2,7 +2,12 @@ package com.Tasko.Registration.error;
 
 public class UserAlreadyExist extends Exception
 {
-    public UserAlreadyExist() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public UserAlreadyExist() {
         super();
     }
 

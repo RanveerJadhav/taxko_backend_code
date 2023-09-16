@@ -1,10 +1,22 @@
 package com.Tasko.Registration.dto;
 
+import java.util.Date;
+
 public class filed_NotfiledDTO
 {
     private String accountyear;
     private Long filed;
     private Long Notfiled;
+
+    private Date lastUpdateDate;
+
+    public Date getLastUpdateDate(Date lastUpdateDate) {
+        return this.lastUpdateDate;
+    }
+
+    public void setLastUpdateDate(Date lastUpdateDate) {
+        this.lastUpdateDate = lastUpdateDate;
+    }
 
     public String getAccountyear() {
         return accountyear;

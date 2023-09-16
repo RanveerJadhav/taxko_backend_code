@@ -7,9 +7,6 @@ public class authclient
     private String token;
     private Optional<Client_Registation_Form> client;
 
-    public authclient(Optional<Client_Registation_Form> client) {
-    }
-
     public String getToken() {
         return token;
     }

@@ -1,44 +1,30 @@
 package com.Tasko.Registration.Service;
 
-
+import java.io.InputStream;
 import java.util.*;
-
-
 import com.Tasko.Registration.Entity.FileEntity;
 import com.Tasko.Registration.Entity.Filed_NotFiled;
 import com.Tasko.Registration.Repository.*;
 import com.Tasko.Registration.dto.ClientCountsDTO;
 import com.Tasko.Registration.dto.filed_NotfiledDTO;
-import com.Tasko.Registration.error.FileAlreadyExists;
-import com.Tasko.Registration.error.OtpNotVaild;
-import com.Tasko.Registration.error.UserAlreadyExist;
-import com.Tasko.Registration.error.UserNotFoundException;
-
+import com.Tasko.Registration.error.*;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 import com.Tasko.Registration.Entity.Client_Registation_Form;
 import com.Tasko.Registration.Entity.User_RegistrationsForm;
-
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-import static org.springframework.web.servlet.function.ServerResponse.status;
-
+import java.util.Optional;
 
 @Service
 public class ServiceImpl implements TaskoService
@@ -50,6 +36,7 @@ public class ServiceImpl implements TaskoService
    
    @Autowired
 	private PasswordEncoder passwordEncoder;
+
    
    @Autowired
    private ClientRepository clientRepository;
@@ -63,15 +50,19 @@ public class ServiceImpl implements TaskoService
 
 
 	@Override
-	public User_RegistrationsForm saveUser(User_RegistrationsForm user) throws UserAlreadyExist
-	{
+	public User_RegistrationsForm saveUser(User_RegistrationsForm user) throws UserAlreadyExist, EmailMandatoryException {
+
+		Optional<User_RegistrationsForm> existingUserWithEmail = taskoRepository.findByEmail(user.getEmail());
 
 		if(taskoRepository.findByPan(user.getPan()).isPresent())
 		{
-			throw new UserAlreadyExist("User Already Exist");
+			throw new UserAlreadyExist("PAN Already Exist");
+		}
+		if (existingUserWithEmail.isPresent())
+		{
+			throw new EmailMandatoryException("Email Already Exist");
 		}
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
-		System.out.println("User Registrations Is Done");
 		return taskoRepository.save(user);
 	}
 
@@ -93,13 +84,18 @@ public void deleteUserById(Long regId)
 
 
 	@Override
-	public Client_Registation_Form saveclient(Client_Registation_Form client) throws UserAlreadyExist
+	public Client_Registation_Form saveclient(Client_Registation_Form client) throws UserAlreadyExist, EmailMandatoryException
 	{
+		Optional<Client_Registation_Form> existingEmail = clientRepository.findByEmail(client.getEmail());
+		
 		if(clientRepository.findByPan(client.getPan()).isPresent())
 		{
-			throw new UserAlreadyExist("User Already Exist");
+			throw new UserAlreadyExist("PAN Already Exist");
 		}
-		System.out.println("Client Registrations Is Done");
+		if (existingEmail.isPresent())
+		{
+			throw new EmailMandatoryException("Email Already Exist");
+		}
 		return clientRepository.save(client);
 	}
 
@@ -314,55 +310,132 @@ public void deleteUserById(Long regId)
 		return countsDTO;
 	}
 
+
 	//------------------------------File---------------------------
 
-	//private String uploadDirectory = "/home/ubuntu/upoladedFiles/"; //Set your path
-	private String uploadDirectory = "G:\\File_Upload\\";
-	@Override
-	public FileEntity uploadFile(Long userid, Long clientid, String accountyear, MultipartFile file,String fileName) throws MultipartException,FileAlreadyExists, IOException {
-		String filename = generateUniqueFilename(userid, clientid, accountyear, fileName);
-		Optional<FileEntity> filehandler=fileRepository.findFirstByUseridAndClientidAndAccountyearAndFileName(userid,clientid,accountyear,filename);
+//	private String uploadDirectory = "/home/ubuntu/upoladedFiles/"; //Set your path
+//	//private String uploadDirectory = "G:\\File_Upload\\";
+//	@Override
+//	public FileEntity uploadFile(Long userid, Long clientid, String accountyear, MultipartFile file,String fileName) throws MultipartException,FileAlreadyExists, IOException {
+//		String filename = generateUniqueFilename(userid, clientid, accountyear, fileName);
+//		Optional<FileEntity> filehandler=fileRepository.findFirstByUseridAndClientidAndAccountyearAndFileName(userid,clientid,accountyear,filename);
+//
+//		String name=file.getOriginalFilename().toString();
+//		String result[]=name.split("\\.");
+//		Path filePath = Paths.get(uploadDirectory + filename +"."+result[1]);
+//		if (filehandler.isPresent())
+//		{
+//			throw new FileAlreadyExists("File Already Exists!");
+//		}
+//		Files.copy(file.getInputStream(), filePath);
+//		System.out.println("File uploaded and saved as: " + filePath);
+//		FileEntity fileInfo = new FileEntity();
+//		fileInfo.setUserid(userid);
+//		fileInfo.setClientid(clientid);
+//		fileInfo.setFileName(filename);
+//		fileInfo.setFilePath(String.valueOf(filePath));
+//		fileInfo.setAccountyear(accountyear);
+//		return fileRepository.save(fileInfo);
+//
+//	}
 
-		String name=file.getOriginalFilename().toString();
-		String result[]=name.split("\\.");
-		Path filePath = Paths.get(uploadDirectory + filename +"."+result[1]);
-		if (filehandler.isPresent())
-		{
+	@Autowired
+	private AmazonS3 amazonS3;
+
+	@Value("${aws.s3.bucketName}")
+	private String bucketName;
+	public FileEntity uploadFile(Long userid, Long clientid, String accountyear, MultipartFile file, String fileName) throws FileAlreadyExists, IOException {
+		String filename = generateUniqueFilename(userid, clientid, accountyear, fileName);
+
+		Optional<FileEntity> fileHandler = fileRepository.findFirstByUseridAndClientidAndAccountyearAndFileName(userid, clientid, accountyear, filename);
+		if (fileHandler.isPresent()) {
 			throw new FileAlreadyExists("File Already Exists!");
 		}
-		Files.copy(file.getInputStream(), filePath);
-		System.out.println("File uploaded and saved as: " + filePath);
+
+		String name = file.getOriginalFilename();
+		String[] result = name.split("\\.");
+		String fileExtension = result[result.length - 1];
+
+		// Upload the file to S3
+		ObjectMetadata metadata = new ObjectMetadata();
+		metadata.setContentType(file.getContentType());
+		InputStream inputStream = file.getInputStream();
+		String s3Key = filename + "." + fileExtension;
+		amazonS3.putObject(new PutObjectRequest(bucketName, s3Key, inputStream, metadata));
+
+		System.out.println("File uploaded to S3: " + s3Key);
+
 		FileEntity fileInfo = new FileEntity();
 		fileInfo.setUserid(userid);
 		fileInfo.setClientid(clientid);
 		fileInfo.setFileName(filename);
-		fileInfo.setFilePath(String.valueOf(filePath));
+		fileInfo.setFilePath("s3://" + bucketName + "/" + s3Key);
 		fileInfo.setAccountyear(accountyear);
-		return fileRepository.save(fileInfo);
 
+		return fileRepository.save(fileInfo);
 	}
+
 
 	private String generateUniqueFilename(long userId, long clientId, String accountYear, String filename) {
 		return userId + "_" + clientId + "_" + accountYear + "_" + filename;
 	}
 
 
-	public Resource getFile(Long id, Long userid, Long clientid,String accountyear) throws IOException
-	{
+
+
+	@SuppressWarnings("unused")
+	private String getFileExtension(String fileName) {
+		int lastDotIndex = fileName.lastIndexOf(".");
+		if (lastDotIndex != -1) {
+			return fileName.substring(lastDotIndex);
+		}
+		return ""; // If there's no file extension, return an empty string
+	}
+
+
+//	public Resource getFile(Long id, Long userid, Long clientid,String accountyear) throws IOException
+//	{
+//		Optional<FileEntity> fileInfoOptional = Optional.ofNullable(fileRepository.findByIdAndUseridAndClientidAndAccountyear(id, userid, clientid, accountyear));
+//		if (fileInfoOptional.isPresent()) {
+//			FileEntity fileInfo = fileInfoOptional.get();
+//			Path filePath = Paths.get(uploadDirectory, fileInfo.getFileName());
+//			Resource resource = new UrlResource(filePath.toUri());
+//
+//			if (resource.exists()) {
+//				return resource;
+//			} else {
+//				throw new RuntimeException("File not found.");
+//			}
+//		} else {
+//			throw new RuntimeException("File information not found.");
+//		}
+//	}
+
+	public Resource getFile(Long id, Long userid, Long clientid, String accountyear) throws IOException {
 		Optional<FileEntity> fileInfoOptional = Optional.ofNullable(fileRepository.findByIdAndUseridAndClientidAndAccountyear(id, userid, clientid, accountyear));
+
 		if (fileInfoOptional.isPresent()) {
 			FileEntity fileInfo = fileInfoOptional.get();
-			Path filePath = Paths.get(uploadDirectory, fileInfo.getFileName());
-			Resource resource = new UrlResource(filePath.toUri());
+			String s3Key = fileInfo.getFileName(); // Assuming the S3 object key is the same as the filename
 
-			if (resource.exists()) {
-				return resource;
-			} else {
-				throw new RuntimeException("File not found.");
-			}
+			// Fetch the file from S3
+			S3Object s3Object = amazonS3.getObject(bucketName, s3Key);
+			S3ObjectInputStream inputStream = s3Object.getObjectContent();
+
+			// Create a Resource from the S3ObjectInputStream
+			Resource resource = new InputStreamResource(inputStream);
+
+			return resource;
 		} else {
 			throw new RuntimeException("File information not found.");
 		}
+	}
+
+	//------------------------------------Get File By Client Id---------------------------------------------------
+	@Override
+	public List<FileEntity> getfileByclient(Long clientid, String accountyear) {
+		// TODO Auto-generated method stub
+		return fileRepository.findByClientidAndAccountyear(clientid, accountyear);
 	}
 
 	@Override
@@ -375,17 +448,34 @@ public void deleteUserById(Long regId)
 
 	//---------------------------------Filed_Not Update---------------------------------------------
 
+//	@Override
+//	public Filed_NotFiled updateFiledNotFiled(Long userid, Long clientid, String accountyear)
+//	{
+//		Filed_NotFiled record = filed_notFiledRepo.findByUseridAndClientidAndAccountyear(userid, clientid,accountyear);
+//		if (record != null)
+//		{
+//			record.setFilednotfiled("yes");
+//			return filed_notFiledRepo.save(record);
+//		}
+//		return record;
+//	}
+
 	@Override
 	public Filed_NotFiled updateFiledNotFiled(Long userid, Long clientid, String accountyear)
 	{
-		Filed_NotFiled record = filed_notFiledRepo.findByUseridAndClientidAndAccountyear(userid, clientid,accountyear);
+		Filed_NotFiled record = filed_notFiledRepo.findByUseridAndClientidAndAccountyear(userid, clientid, accountyear);
 		if (record != null)
 		{
 			record.setFilednotfiled("yes");
+
+			// Set the lastUpdateDate to the current system date and time
+			record.setLastUpdateDate(new Date());
+
 			return filed_notFiledRepo.save(record);
 		}
 		return record;
 	}
+
 
 	@Override
 	public List<filed_NotfiledDTO> getFileCountsByUser(Long userid) {
@@ -408,42 +498,60 @@ public void deleteUserById(Long regId)
 		return fileCountDTOs;
 	}
 
-
-
-
 	//------------Delete File-----------
-	@Override
-	public void deleteMultipleFiles(List<Long> id) throws IOException
-	{
-		for (Long fileId : id) {
-			Optional<FileEntity> fileEntityOptional = fileRepository.findById(fileId);
-			fileEntityOptional.ifPresent(fileEntity -> {
-				String filePath = fileEntity.getFilePath();
-				Path fullPath = Paths.get(filePath);
-				try {
-					Files.delete(fullPath);
-				} catch (IOException e) {
-					e.printStackTrace();
+//	@Override
+//	public void deleteMultipleFiles(List<Long> id) throws IOException
+//	{
+//		for (Long fileId : id) {
+//			Optional<FileEntity> fileEntityOptional = fileRepository.findById(fileId);
+//			fileEntityOptional.ifPresent(fileEntity -> {
+//				String filePath = fileEntity.getFilePath();
+//				Path fullPath = Paths.get(filePath);
+//				try {
+//					Files.delete(fullPath);
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//
+//				}
+//			});
+//			fileRepository.deleteById(fileId);
+//		}
+//	}
 
-				}
-			});
-			fileRepository.deleteById(fileId);
-		}
-	}
+
+//	public void deleteMultipleFiles(List<Long> ids) throws IOException {
+//		for (Long fileId : ids) {
+//			Optional<FileEntity> fileEntityOptional = fileRepository.findById(fileId);
+//			fileEntityOptional.ifPresent(fileEntity -> {
+//				String s3Key = fileEntity.getFileName(); // Assuming the S3 object key is the same as the filename
+//				try {
+//					// Delete the file from S3
+//					amazonS3.deleteObject(new DeleteObjectRequest(bucketName, s3Key));
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+//			});
+//			fileRepository.deleteById(fileId);
+//		}
+//	}
+
+
+
 	//--------------------------------------Set Client Password--------------------------------------------------------
-	@Override
-	public void setpassword(String pan,String password)
-	{
-		Optional<Client_Registation_Form> optionalForm = clientRepository.findByPan(pan);
-		if (optionalForm.isPresent()) {
-			Client_Registation_Form form = optionalForm.get();
-			form.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
-			clientRepository.save(form);
-		} else {
-			// Handle PAN not found case
-			throw new EntityNotFoundException("Client with PAN " + pan + " not found.");
-		}
+
+@Override
+public void setpassword(String pan, String newPassword) {
+	Optional<Client_Registation_Form> optionalForm = clientRepository.findByPan(pan);
+
+	if (optionalForm.isPresent()) {
+		Client_Registation_Form form = optionalForm.get();
+		form.setPassword(passwordEncoder.encode(newPassword)); // Encode the new password
+		clientRepository.save(form);
+	} else {
+		throw new EntityNotFoundException("Client with PAN " + pan + " not found.");
 	}
+}
+
 
 
 
@@ -531,6 +639,10 @@ public void deleteUserById(Long regId)
 		user.setOtp(null);
 		forgetRepo.save(user);
 	}
+
+
+
+
 }
 
 

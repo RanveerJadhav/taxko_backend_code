@@ -2,7 +2,12 @@ package com.Tasko.Registration.error;
 
 public class OtpNotVaild extends Exception
 {
-    public OtpNotVaild() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public OtpNotVaild() {
         super();
     }
 

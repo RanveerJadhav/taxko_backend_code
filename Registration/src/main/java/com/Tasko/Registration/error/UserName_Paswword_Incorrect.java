@@ -6,7 +6,12 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(HttpStatus.UNAUTHORIZED)
 public class UserName_Paswword_Incorrect extends RuntimeException
 {
-    public UserName_Paswword_Incorrect() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public UserName_Paswword_Incorrect() {
         super();
     }
 

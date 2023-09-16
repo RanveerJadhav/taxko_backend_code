@@ -28,6 +28,7 @@ public class Client_Registation_Form
 	     @NotBlank(message ="Mobile is mandatory")
 	     @Size(min = 10, max = 10)
 	     private String mobile;
+		 @Column(unique=true)
 	     private String email;
 	     private String address;
 	     private String pin_code;

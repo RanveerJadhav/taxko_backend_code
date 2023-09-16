@@ -1,7 +1,9 @@
 package com.Tasko.Registration.Entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 
+import java.util.Date;
 import java.util.Objects;
 
 @Entity
@@ -18,6 +20,19 @@ public class Filed_NotFiled
     private String accountyear;
 
     private String  filednotfiled;
+
+    @Column(name = "last_update_date")
+    @JsonFormat(pattern="yyyy-MM-dd")
+    private Date lastUpdateDate;
+
+    public Date getLastUpdateDate() {
+        return lastUpdateDate;
+    }
+
+    public void setLastUpdateDate(Date lastUpdateDate) {
+        this.lastUpdateDate = lastUpdateDate;
+    }
+
 
     public Long getId() {
         return id;

@@ -1,42 +1,42 @@
 package com.Tasko.Registration.config;
 
 import com.Tasko.Registration.Entity.Client_Registation_Form;
-import com.Tasko.Registration.Entity.User_RegistrationsForm;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
 
-public class ClientInfoClientDetails implements UserDetails
-{
+public class ClientUserInfoUserDetails implements UserDetails {
 
-    private String name;
-    private String password;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private String clientusername; // Use client's PAN as username
+    private String clientpassword;
     private List<GrantedAuthority> authorities;
 
-    public ClientInfoClientDetails(Client_Registation_Form userInfo)
-    {
-        name=userInfo.getPan();
-        password=userInfo.getPassword();
-
+    public ClientUserInfoUserDetails(Client_Registation_Form clientInfo) {
+        this.clientusername = clientInfo.getPan(); // Set username as client's PAN
+        this.clientpassword = clientInfo.getPassword(); // Set password from client's registration data
+        // You can set authorities if needed based on client's roles or permissions
+        // Example: this.authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_CLIENT"));
     }
 
-
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities()
-    {
+    public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;
     }
 
     @Override
     public String getPassword() {
-        return password;
+        return clientpassword;
     }
 
     @Override
     public String getUsername() {
-        return name;
+        return clientusername;
     }
 
     @Override
@@ -60,4 +60,6 @@ public class ClientInfoClientDetails implements UserDetails
     public boolean isEnabled() {
         return true;
     }
+
+
 }

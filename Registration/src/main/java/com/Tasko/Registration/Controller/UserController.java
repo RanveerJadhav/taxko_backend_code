@@ -1,47 +1,39 @@
 package com.Tasko.Registration.Controller;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.*;
 import com.Tasko.Registration.Entity.*;
-import com.Tasko.Registration.Repository.ClientRepository;
 import com.Tasko.Registration.Repository.FileRepository;
 import com.Tasko.Registration.Repository.Filed_NotFiledRepo;
 import com.Tasko.Registration.Service.JwtService;
-import com.Tasko.Registration.dto.AuthRequest;
-import com.Tasko.Registration.dto.ClientCountsDTO;
-import com.Tasko.Registration.dto.filed_NotfiledDTO;
-import com.Tasko.Registration.error.FileAlreadyExists;
-import com.Tasko.Registration.error.OtpNotVaild;
-import com.Tasko.Registration.error.UserAlreadyExist;
-import com.Tasko.Registration.error.UserNotFoundException;
-import org.apache.logging.log4j.LogManager;
+import com.Tasko.Registration.dto.*;
+import com.Tasko.Registration.error.*;
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.*;
-
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-
 import org.springframework.web.bind.annotation.*;
-
 import com.Tasko.Registration.Repository.TaskoRepository;
 import com.Tasko.Registration.Service.TaskoService;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
-
 import org.springframework.core.io.Resource;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.file.Path;
 @RestController
 @CrossOrigin(origins = "*")
-public class UserController 
+public class UserController
 {
 	@Autowired
 	private JwtService jwtService;
@@ -53,9 +45,6 @@ public class UserController
 
 	@Autowired
 	private FileRepository fileRepository;
-
-	@Autowired
-	private ClientRepository clientRepository;
 
 	@Autowired
 	private TaskoRepository taskoRepository;
@@ -76,7 +65,7 @@ public class UserController
 			throw e;
 		}
 	}
-	
+
 	@GetMapping("/getuser")
 	public List<User_RegistrationsForm> FetchUser(Filed_NotFiled f)
 	{
@@ -106,7 +95,7 @@ public class UserController
 			throw e;
 		}
 	}
-	
+
 	@PutMapping("/updateuser/{id}")
 	public User_RegistrationsForm updateUser(@RequestBody User_RegistrationsForm user,@PathVariable("id") Long RegId)
 	{
@@ -138,8 +127,7 @@ public class UserController
 	}
 
 	@PostMapping("/createclient")
-	public Client_Registation_Form saveclient(@RequestBody Client_Registation_Form client) throws UserAlreadyExist
-	{
+	public Client_Registation_Form saveclient(@RequestBody Client_Registation_Form client) throws UserAlreadyExist, EmailMandatoryException {
 		logger.info("Received a request to create a client: {}", client.getPan());
 
 		try {
@@ -155,36 +143,7 @@ public class UserController
 		}
 	}
 
-	//----------------------------------------------Login Page------------------------------------------------------------------------------------------------
-	@PostMapping("/authenticate")
-	public ResponseEntity<Object> authenticateAndGetToken(@RequestBody AuthRequest authRequest) throws Exception
-	{
-		logger.info("Received an authentication request for username: {}", authRequest.getUsername());
 
-		try {
-			Optional<User_RegistrationsForm> user = taskoRepository.findByPan(authRequest.getUsername());
-
-			Authentication authentication = authenticationManager.authenticate(
-					new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
-
-			if (authentication.isAuthenticated()) {
-				String jwt = jwtService.generateToken(authRequest.getUsername());
-
-				authuser response = new authuser(user);
-				response.setToken(jwt);
-				response.setUser(user);
-
-				logger.info("User {} has been authenticated successfully.", authRequest.getUsername());
-				return ResponseEntity.ok(response);
-			}
-		} catch (Exception e) {
-			logger.error("Authentication failed for user {}: {}", authRequest.getUsername(), e.getMessage());
-			return ResponseEntity
-					.status(HttpStatus.UNAUTHORIZED)
-					.body(e.getMessage());
-		}
-		return ResponseEntity.ok(null);
-	}
 
 	@GetMapping("getClientById/{userid}/{clientId}")
 	public Client_Registation_Form getClientByClientidUserid(@PathVariable Long userid,
@@ -308,7 +267,7 @@ public class UserController
 			List<FileEntity> files = taskoService.getFilesByUserAndClientAndYear(userid, clientid, accountyear);
 			logger.info("Files fetched successfully for user ID {}, client ID {}, and account year {}",
 					userid, clientid, accountyear);
-			return ResponseEntity.ok(files);
+			return  ResponseEntity.ok(files);
 		}
 		catch (Exception e) {
 			logger.error("An error occurred while fetching files: {}", e.getMessage());
@@ -339,32 +298,119 @@ public class UserController
 		}
 	}
 	//-----------------------------delete File By id-----------------------
+//	@DeleteMapping("/deletefile")
+//	public ResponseEntity<String> deleteMultipleFiles(@RequestBody List<Long> id){
+//		try {
+//			taskoService.deleteMultipleFiles(id);
+//			logger.info("Files with IDs {} deleted successfully.", id);
+//			return ResponseEntity.ok("Files deleted successfully.");
+//		} catch (IOException e) {
+//			logger.error("Error deleting files with IDs " + id, e);
+//			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting files.");
+//		}
+//	}
+
+	@Autowired
+	private AmazonS3 amazonS3;
+
+//	@Value("${aws.s3.bucketName}")
+//	private String bucketName;
+
+	String bucketName="arkonet";
+
 	@DeleteMapping("/deletefile")
-	public ResponseEntity<String> deleteMultipleFiles(@RequestBody List<Long> id){
+	@Transactional
+	public ResponseEntity<String> deleteFiles(@RequestBody DeleteFilesRequest request) {
 		try {
-			taskoService.deleteMultipleFiles(id);
-			logger.info("Files with IDs {} deleted successfully.", id);
+			for (Long fileId : request.getFileIds())
+			{
+				Optional<FileEntity> fileEntityOptional = fileRepository.findById(fileId);
+				fileEntityOptional.ifPresent(fileEntity -> {
+					String s3Key = fileEntity.getFilePath();// Assuming the S3 object key is the same as the filename
+
+					// Find the last index of '/' character
+					int lastIndex = s3Key.lastIndexOf('/');
+
+					// Extract the filename from the input string
+					String newVariable = s3Key.substring(lastIndex + 1);
+
+
+					try {
+						// Delete the file from S3
+						amazonS3.deleteObject(new DeleteObjectRequest(bucketName, newVariable));
+					} catch (AmazonServiceException e) {
+						// Handle AWS S3 service exceptions
+						e.printStackTrace();
+						// Log the error for debugging purposes
+						logger.error("Failed to delete file from S3: {}", e.getMessage());
+						throw e; // Re-throw the exception to trigger transaction rollback
+					}
+					// Delete the record from the database
+					fileRepository.deleteById(fileId);
+				});
+			}
 			return ResponseEntity.ok("Files deleted successfully.");
-		} catch (IOException e) {
-			logger.error("Error deleting files with IDs " + id, e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting files.");
+		} catch (Exception e) {
+			// Handle any other exceptions that might occur during file deletion or database operations
+			e.printStackTrace();
+			// Log the error for debugging purposes
+			logger.error("Failed to delete files: {}", e.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete files.");
 		}
 	}
+
 	//----------------------------Open File------------------------
+//	@GetMapping("/openfile/{fileId}")
+//	public ResponseEntity<Resource> openFile(@PathVariable Long fileId) {
+//		try {
+//			Optional<FileEntity> fileEntityOptional = fileRepository.findById(fileId);
+//
+//			if (fileEntityOptional.isPresent()) {
+//				FileEntity fileEntity = fileEntityOptional.get();
+//				Path filePath = (Path) Paths.get(fileEntity.getFilePath());
+//
+//				InputStreamResource resource = new InputStreamResource(Files.newInputStream((java.nio.file.Path) filePath));
+//
+//				HttpHeaders headers = new HttpHeaders();
+//				headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+//				headers.setContentDisposition(ContentDisposition.attachment().filename(fileEntity.getFileName()).build());
+//
+//				return ResponseEntity.ok()
+//						.headers(headers)
+//						.body(resource);
+//			} else {
+//				return ResponseEntity.notFound().build();
+//			}
+//		} catch (IOException e) {
+//			logger.error("An I/O error occurred while opening the file: {}", e.getMessage());
+//			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+//		}
+//	}
+
+
+
+
 	@GetMapping("/openfile/{fileId}")
 	public ResponseEntity<Resource> openFile(@PathVariable Long fileId) {
 		try {
+			// Fetch the file information from your database (file repository)
 			Optional<FileEntity> fileEntityOptional = fileRepository.findById(fileId);
 
 			if (fileEntityOptional.isPresent()) {
 				FileEntity fileEntity = fileEntityOptional.get();
-				Path filePath = (Path) Paths.get(fileEntity.getFilePath());
+				String s3Key = getS3KeyFromFilePath(fileEntity.getFilePath());
 
-				InputStreamResource resource = new InputStreamResource(Files.newInputStream((java.nio.file.Path) filePath));
+				// Fetch the file content from S3
+				S3Object s3Object = amazonS3.getObject(bucketName, s3Key);
+				byte[] content = IOUtils.toByteArray(s3Object.getObjectContent());
 
+				// Set up headers
 				HttpHeaders headers = new HttpHeaders();
 				headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
 				headers.setContentDisposition(ContentDisposition.attachment().filename(fileEntity.getFileName()).build());
+
+				// Create a resource from the S3 content
+				InputStreamResource resource = new InputStreamResource(new ByteArrayInputStream(content));
 
 				return ResponseEntity.ok()
 						.headers(headers)
@@ -372,22 +418,26 @@ public class UserController
 			} else {
 				return ResponseEntity.notFound().build();
 			}
-		} catch (IOException e) {
-			logger.error("An I/O error occurred while opening the file: {}", e.getMessage());
+		} catch (Exception e) {
+			// Handle exceptions appropriately
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
 	}
+
+	// Helper method to extract S3 key from the S3 URL
+	private String getS3KeyFromFilePath(String s3FilePath) {
+		// Assuming your S3 URL format is "s3://bucketName/s3Key"
+		String[] parts = s3FilePath.split("/");
+		return parts[parts.length - 1];
+	}
 	//------------------------Change Password----------------------------------------------------------------
 	@PutMapping("/changePassword/{regId}")
-	public ResponseEntity<String> changePassword(@PathVariable long regId,
-												 @RequestParam String oldPassword,
-												 @RequestParam String newPassword)
-	{
+	public ResponseEntity<String> changePassword(@PathVariable long regId, @RequestBody ChangePassword request) {
 		logger.info("Received a request to change password for user with ID: {}", regId);
 
 		try {
-			if (taskoService.isOldPasswordCorrect(regId, oldPassword)) {
-				taskoService.updatePassword(regId, newPassword);
+			if (taskoService.isOldPasswordCorrect(regId, request.getOldPassword())) {
+				taskoService.updatePassword(regId, request.getNewPassword());
 				logger.info("Password changed successfully for user with ID: {}", regId);
 				return ResponseEntity.ok("Password changed successfully.");
 			} else {
@@ -395,7 +445,7 @@ public class UserController
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid old password.");
 			}
 		} catch (Exception e) {
-			logger.error("An error occurred while changing password for user with ID {}: {}", regId, e.getMessage());
+			logger.error("An error occurred while changing the password for user with ID {}: {}", regId, e.getMessage());
 			throw e;
 		}
 	}
@@ -462,6 +512,7 @@ public class UserController
 	//-------------------------------Filed_Notfiled save data---------------------------------------------------------
 	@Autowired
 	private Filed_NotFiledRepo filed_notFiledRepo;
+
 	@PostMapping("/saveData")
 	public ResponseEntity<String> saveData(@RequestBody Filed_NotFiled data)
 	{
@@ -503,6 +554,7 @@ public class UserController
 			throw e;
 		}
 	}
+
     //---------------------------Counts Of filed-Notfiled-----------------------
 	@GetMapping("/filedNotfiledCounts/{userid}")
 	public ResponseEntity<List<filed_NotfiledDTO>> getFileCountsByUser(@PathVariable Long userid)
@@ -547,5 +599,72 @@ public class UserController
 		}
 	}
 
+	//-------------------------------------------Find Max Date Of filed-Notfiled-----------------------------------
+	@GetMapping("/maxLastUpdateDate/{id}")
+	public ResponseEntity<Map<String, String>> getMaxLastUpdateDateByUserId(@PathVariable("id") Long userid)
+	{
+		Optional<LocalDate> maxLastUpdateDate = Optional.ofNullable(filed_notFiledRepo.findMaxLastUpdateDateByUserid(userid));
+		if (maxLastUpdateDate.isPresent())
+		{
+			Map<String, String> response = new HashMap<>();
+			response.put("lastUpdateDate", maxLastUpdateDate.get().toString());
+			return ResponseEntity.ok(response);
+		}
+		else
+		{
+			return ResponseEntity.notFound().build();
+		}
+	}
+
+
+
+	//----------------------------------------------Login Page------------------------------------------------------------------------------------------------
+	@PostMapping("/authenticate")
+	public ResponseEntity<Object> authenticateAndGetToken(@RequestBody AuthRequest authRequest) throws Exception
+	{
+		logger.info("Received an authentication request for username: {}", authRequest.getUsername());
+
+		try {
+
+			Optional<User_RegistrationsForm> user = taskoRepository.findByPan(authRequest.getUsername());
+
+			Authentication authentication = authenticationManager.authenticate(
+					new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
+
+				if(user.isPresent())
+				{
+					if (authentication.isAuthenticated()) {
+						String jwt = jwtService.generateToken(authRequest.getUsername());
+
+						authuser response = new authuser(user, jwt);
+						response.setToken(jwt);
+						response.setUser(user);
+
+						logger.info("User {} has been authenticated successfully.", authRequest.getUsername());
+						return ResponseEntity.ok(response);
+					}
+				}
+				else
+				{
+					throw new Exception("User Not Found");
+				}
+
+
+		} catch (Exception e) {
+			logger.error("Authentication failed for user {}: {}", authRequest.getUsername(), e.getMessage());
+			return ResponseEntity
+					.status(HttpStatus.UNAUTHORIZED)
+					.body(e.getMessage());
+		}
+		return ResponseEntity.ok(null);
+
+	}
+
+	@GetMapping("/check")
+	public String getLoggingData()
+	{
+		logger.info("Data from getdata()");
+		return"usercontroller";
+	}
 
 }

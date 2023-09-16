@@ -1,6 +1,13 @@
 package com.Tasko.Registration.config;
 
+//import com.Tasko.Registration.filter.JwtClientAuthFilter;
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -28,13 +35,16 @@ import java.util.Properties;
 @EnableWebSecurity
 @EnableMethodSecurity
 @CrossOrigin(origins = "*")
-public class SecurityConfig 
+public class SecurityConfig
 {
     @Autowired
     private JwtAuthFilter authFilter;
 
     @Autowired
     private JwtAuthenticationEntryPoint entrypoint;
+
+//    @Autowired
+//    private JwtClientAuthFilter jwtClientAuthFilter;
 
     @Bean
     //authentication
@@ -49,8 +59,8 @@ public class SecurityConfig
     {
         return http.csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/createuser","/authenticate","/send-otp","/verify-otp","/reset-password","/client/isPasswordNull","/clientSetPassword"
-                ,"/client/login")
+                .requestMatchers("/createuser","/authenticate","/send-otp","/verify-otp","/reset-password","/client/authenticate"
+                ,"/client/isPasswordNull","/client/SetPassword")
                 .permitAll()
                 .and()
                 .cors()
@@ -66,11 +76,12 @@ public class SecurityConfig
                 .and()
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
+               // .addFilterBefore(jwtClientAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() 
+    public PasswordEncoder passwordEncoder()
     {
         return new BCryptPasswordEncoder();
     }
@@ -84,7 +95,7 @@ public class SecurityConfig
         return authenticationProvider;
     }
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception 
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception
     {
         return config.getAuthenticationManager();
     }
@@ -105,6 +116,24 @@ public class SecurityConfig
         props.put("mail.debug", "true");
 
         return mailSender;
+    }
+
+    @Value("${aws.accessKeyId}") // Configure these properties in your application.properties or application.yml
+    private String awsAccessKeyId;
+
+    @Value("${aws.secretKey}")
+    private String awsSecretKey;
+
+    @Value("${aws.region}") // Specify the AWS region
+    private String awsRegion;
+
+    @Bean
+    public AmazonS3 amazonS3() {
+        AWSCredentials awsCredentials = new BasicAWSCredentials(awsAccessKeyId, awsSecretKey);
+        return AmazonS3Client.builder()
+                .withRegion(awsRegion)
+                .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
+                .build();
     }
 
 }

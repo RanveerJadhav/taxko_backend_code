@@ -2,7 +2,12 @@ package com.Tasko.Registration.error;
 
 public class UserNotFoundException extends Exception
 {
-    public UserNotFoundException() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public UserNotFoundException() {
         super();
     }
 

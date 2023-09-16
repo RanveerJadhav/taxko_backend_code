@@ -2,7 +2,7 @@ package com.Tasko.Registration.Entity;
 
 import jakarta.persistence.*;
 
-import java.nio.file.Path;
+
 
 @Entity
 @Table(name = "files")

@@ -2,7 +2,12 @@ package com.Tasko.Registration.error;
 
 public class FileSize extends Exception
 {
-    public FileSize() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public FileSize() {
         super();
     }
 
