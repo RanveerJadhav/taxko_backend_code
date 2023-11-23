@@ -1,6 +1,7 @@
 package com.Tasko.Registration.config;
 
 import com.Tasko.Registration.Entity.Client_Registation_Form;
+import com.Tasko.Registration.Entity.ClientPass_Imgdetail;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -17,7 +18,7 @@ public class ClientUserInfoUserDetails implements UserDetails {
     private String clientpassword;
     private List<GrantedAuthority> authorities;
 
-    public ClientUserInfoUserDetails(Client_Registation_Form clientInfo) {
+    public ClientUserInfoUserDetails(ClientPass_Imgdetail clientInfo) {
         this.clientusername = clientInfo.getPan(); // Set username as client's PAN
         this.clientpassword = clientInfo.getPassword(); // Set password from client's registration data
         // You can set authorities if needed based on client's roles or permissions

@@ -85,4 +85,11 @@ public ResponseEntity<String> handleMultipartException() {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(massage);
     }
 
+    @ExceptionHandler(EnterValidAmount.class)
+    public ResponseEntity<ErrorMessage> EnterValidAmount(EnterValidAmount enterValidAmount,WebRequest request)
+    {
+        ErrorMessage massage=new ErrorMessage(HttpStatus.NOT_FOUND,enterValidAmount.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(massage);
+    }
+
 }

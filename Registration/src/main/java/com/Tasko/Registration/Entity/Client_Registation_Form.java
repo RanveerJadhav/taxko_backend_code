@@ -15,188 +15,220 @@ public class Client_Registation_Form
 	     @Id
 	     @GeneratedValue(strategy = GenerationType.IDENTITY)
 	     private Long clientId;
+	     
 	     @NotBlank(message = "Name is mandatory")
 	     private String name;
+	    
 	     @JsonFormat(pattern="yyyy-MM-dd")
 	     private Date dob;
+	    
 	     @NotBlank(message = "Profession is mandatory")
 	     private String profession;
+	     
 	     @NotBlank(message = "PAN_No is mandatory")
-	     @Column(unique=true)
 	     private String pan;
 	     private String telephone;
+	     
 	     @NotBlank(message ="Mobile is mandatory")
 	     @Size(min = 10, max = 10)
 	     private String mobile;
-		 @Column(unique=true)
+		 
 	     private String email;
 	     private String address;
 	     private String pin_code;
 	     private String state;
 	     private String residential_status;
-		 @NotBlank(message ="Category is mandatory")
+		
+	     @NotBlank(message ="Category is mandatory")
 	     private String category;
+	     
 	     private Long userid;
 		 private String password;
-	public Long getClientId() {
-		return clientId;
-	}
+		 
+		   private String imageName;
 
-	public void setClientId(Long clientId) {
-		this.clientId = clientId;
-	}
+		    private String imagePath;
 
-	public String getName() {
-		return name;
-	}
+			public Long getClientId() {
+				return clientId;
+			}
 
-	public void setName(String name) {
-		this.name = name;
-	}
+			public void setClientId(Long clientId) {
+				this.clientId = clientId;
+			}
 
-	public Date getDob() {
-		return dob;
-	}
+			public String getName() {
+				return name;
+			}
 
-	public void setDob(Date dob) {
-		this.dob = dob;
-	}
+			public void setName(String name) {
+				this.name = name;
+			}
 
-	public String getProfession() {
-		return profession;
-	}
+			public Date getDob() {
+				return dob;
+			}
 
-	public void setProfession(String profession) {
-		this.profession = profession;
-	}
+			public void setDob(Date dob) {
+				this.dob = dob;
+			}
 
-	public String getPan() {
-		return pan;
-	}
+			public String getProfession() {
+				return profession;
+			}
 
-	public void setPan(String pan) {
-		this.pan = pan;
-	}
+			public void setProfession(String profession) {
+				this.profession = profession;
+			}
 
-	public String getTelephone() {
-		return telephone;
-	}
+			public String getPan() {
+				return pan;
+			}
 
-	public void setTelephone(String telephone) {
-		this.telephone = telephone;
-	}
+			public void setPan(String pan) {
+				this.pan = pan;
+			}
 
-	public String getMobile() {
-		return mobile;
-	}
+			public String getTelephone() {
+				return telephone;
+			}
 
-	public void setMobile(String mobile) {
-		this.mobile = mobile;
-	}
+			public void setTelephone(String telephone) {
+				this.telephone = telephone;
+			}
 
-	public String getEmail() {
-		return email;
-	}
+			public String getMobile() {
+				return mobile;
+			}
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
+			public void setMobile(String mobile) {
+				this.mobile = mobile;
+			}
 
-	public String getAddress() {
-		return address;
-	}
+			public String getEmail() {
+				return email;
+			}
 
-	public void setAddress(String address) {
-		this.address = address;
-	}
+			public void setEmail(String email) {
+				this.email = email;
+			}
 
-	public String getPin_code() {
-		return pin_code;
-	}
+			public String getAddress() {
+				return address;
+			}
 
-	public void setPin_code(String pin_code) {
-		this.pin_code = pin_code;
-	}
+			public void setAddress(String address) {
+				this.address = address;
+			}
 
-	public String getState() {
-		return state;
-	}
+			public String getPin_code() {
+				return pin_code;
+			}
 
-	public void setState(String state) {
-		this.state = state;
-	}
+			public void setPin_code(String pin_code) {
+				this.pin_code = pin_code;
+			}
 
-	public String getResidential_status() {
-		return residential_status;
-	}
+			public String getState() {
+				return state;
+			}
 
-	public void setResidential_status(String residential_status) {
-		this.residential_status = residential_status;
-	}
+			public void setState(String state) {
+				this.state = state;
+			}
 
-	public String getCategory() {
-		return category;
-	}
+			public String getResidential_status() {
+				return residential_status;
+			}
 
-	public void setCategory(String category) {
-		this.category = category;
-	}
+			public void setResidential_status(String residential_status) {
+				this.residential_status = residential_status;
+			}
 
-	public Long getUserid() {
-		return userid;
-	}
+			public String getCategory() {
+				return category;
+			}
 
-	public void setUserid(Long userid) {
-		this.userid = userid;
-	}
+			public void setCategory(String category) {
+				this.category = category;
+			}
 
-	public String getPassword() {
-		return password;
-	}
+			public Long getUserid() {
+				return userid;
+			}
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
+			public void setUserid(Long userid) {
+				this.userid = userid;
+			}
 
-	public Client_Registation_Form(Long clientId, String name, Date dob, String profession, String pan, String telephone, String mobile, String email, String address, String pin_code, String state, String residential_status, String category, Long userid, String password) {
-		this.clientId = clientId;
-		this.name = name;
-		this.dob = dob;
-		this.profession = profession;
-		this.pan = pan;
-		this.telephone = telephone;
-		this.mobile = mobile;
-		this.email = email;
-		this.address = address;
-		this.pin_code = pin_code;
-		this.state = state;
-		this.residential_status = residential_status;
-		this.category = category;
-		this.userid = userid;
-		this.password = password;
-	}
+			public String getPassword() {
+				return password;
+			}
 
-	@Override
-	public String toString() {
-		return "Client_Registation_Form{" +
-				"clientId=" + clientId +
-				", name='" + name + '\'' +
-				", dob=" + dob +
-				", profession='" + profession + '\'' +
-				", pan='" + pan + '\'' +
-				", telephone='" + telephone + '\'' +
-				", mobile='" + mobile + '\'' +
-				", email='" + email + '\'' +
-				", address='" + address + '\'' +
-				", pin_code='" + pin_code + '\'' +
-				", state='" + state + '\'' +
-				", residential_status='" + residential_status + '\'' +
-				", category='" + category + '\'' +
-				", userid=" + userid +
-				", password='" + password + '\'' +
-				'}';
-	}
+			public void setPassword(String password) {
+				this.password = password;
+			}
 
-	public Client_Registation_Form() {
-	}
+			public String getImageName() {
+				return imageName;
+			}
+
+			public void setImageName(String imageName) {
+				this.imageName = imageName;
+			}
+
+			public String getImagePath() {
+				return imagePath;
+			}
+
+			public void setImagePath(String imagePath) {
+				this.imagePath = imagePath;
+			}
+
+			public Client_Registation_Form(Long clientId, @NotBlank(message = "Name is mandatory") String name,
+					Date dob, @NotBlank(message = "Profession is mandatory") String profession,
+					@NotBlank(message = "PAN_No is mandatory") String pan, String telephone,
+					@NotBlank(message = "Mobile is mandatory") @Size(min = 10, max = 10) String mobile, String email,
+					String address, String pin_code, String state, String residential_status,
+					@NotBlank(message = "Category is mandatory") String category, Long userid, String password,
+					String imageName, String imagePath) {
+				super();
+				this.clientId = clientId;
+				this.name = name;
+				this.dob = dob;
+				this.profession = profession;
+				this.pan = pan;
+				this.telephone = telephone;
+				this.mobile = mobile;
+				this.email = email;
+				this.address = address;
+				this.pin_code = pin_code;
+				this.state = state;
+				this.residential_status = residential_status;
+				this.category = category;
+				this.userid = userid;
+				this.password = password;
+				this.imageName = imageName;
+				this.imagePath = imagePath;
+			}
+
+			public Client_Registation_Form() {
+				super();
+			}
+
+			@Override
+			public String toString() {
+				return "Client_Registation_Form [clientId=" + clientId + ", name=" + name + ", dob=" + dob
+						+ ", profession=" + profession + ", pan=" + pan + ", telephone=" + telephone + ", mobile="
+						+ mobile + ", email=" + email + ", address=" + address + ", pin_code=" + pin_code + ", state="
+						+ state + ", residential_status=" + residential_status + ", category=" + category + ", userid="
+						+ userid + ", password=" + password + ", imageName=" + imageName + ", imagePath=" + imagePath
+						+ "]";
+			}
+			
+			
+			
+			
+		 
+
 }

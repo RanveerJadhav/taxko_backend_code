@@ -1,7 +1,7 @@
 package com.Tasko.Registration.config;
 
-//import com.Tasko.Registration.filter.JwtClientAuthFilter;
 import com.amazonaws.auth.AWSCredentials;
+
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
@@ -43,11 +43,7 @@ public class SecurityConfig
     @Autowired
     private JwtAuthenticationEntryPoint entrypoint;
 
-//    @Autowired
-//    private JwtClientAuthFilter jwtClientAuthFilter;
-
     @Bean
-    //authentication
     public UserDetailsService userDetailsService()
     {
 
@@ -55,12 +51,12 @@ public class SecurityConfig
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception
+	    public SecurityFilterChain securityFilterChain(HttpSecurity https) throws Exception
     {
-        return http.csrf().disable()
+        return https.csrf().disable()
                 .authorizeHttpRequests()
                 .requestMatchers("/createuser","/authenticate","/send-otp","/verify-otp","/reset-password","/client/authenticate"
-                ,"/client/isPasswordNull","/client/SetPassword")
+                ,"/client/isPasswordNull","/client/SetPassword","/client/send-otp","/client/verify-otp","/authenticate/admin","/subscriptionPacks","/api/master-admin","/save/Client_TaxProfessional_data","/savedistributor","/authenticate/Distribution")
                 .permitAll()
                 .and()
                 .cors()
@@ -76,7 +72,6 @@ public class SecurityConfig
                 .and()
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
-               // .addFilterBefore(jwtClientAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
@@ -106,8 +101,8 @@ public class SecurityConfig
         mailSender.setHost("smtp.gmail.com");
         mailSender.setPort(587);
 
-        mailSender.setUsername("ranveerjadhav07@gmail.com");
-        mailSender.setPassword("abpgtlsuvfrbgkzu");
+        mailSender.setUsername("taxkobyarkonet@gmail.com");
+        mailSender.setPassword("uuapyiomphsbxppj");
 
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");

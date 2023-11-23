@@ -56,6 +56,10 @@ public class User_RegistrationsForm
      private  String password;
 
 	private String otp;
+	
+	private String refrenceId;
+	
+	private  String disrefrenceId;
 
 	public Long getRegId() {
 		return regId;
@@ -185,7 +189,49 @@ public class User_RegistrationsForm
 		this.otp = otp;
 	}
 
-	public User_RegistrationsForm(Long regId, String name, Date datebirth, Long membership_No, String profession, String pan, String telephone, String mobile, String email, String office_Address, String pin_code, String state, String whatsApp_Link, String investNow_Email, String password, String otp) {
+	public String getRefrenceId() {
+		return refrenceId;
+	}
+
+	public void setRefrenceId(String refrenceId) {
+		this.refrenceId = refrenceId;
+	}
+
+	public String getDisrefrenceId() {
+		return disrefrenceId;
+	}
+
+	public void setDisrefrenceId(String disrefrenceId) {
+		this.disrefrenceId = disrefrenceId;
+	}
+
+	@Override
+	public String toString() {
+		return "User_RegistrationsForm [regId=" + regId + ", name=" + name + ", datebirth=" + datebirth
+				+ ", membership_No=" + membership_No + ", profession=" + profession + ", pan=" + pan + ", telephone="
+				+ telephone + ", mobile=" + mobile + ", email=" + email + ", office_Address=" + office_Address
+				+ ", pin_code=" + pin_code + ", state=" + state + ", whatsApp_Link=" + whatsApp_Link
+				+ ", investNow_Email=" + investNow_Email + ", password=" + password + ", otp=" + otp + ", refrenceId="
+				+ refrenceId + ", disrefrenceId=" + disrefrenceId + ", getRegId()=" + getRegId() + ", getName()="
+				+ getName() + ", getDatebirth()=" + getDatebirth() + ", getMembership_No()=" + getMembership_No()
+				+ ", getProfession()=" + getProfession() + ", getPan()=" + getPan() + ", getTelephone()="
+				+ getTelephone() + ", getMobile()=" + getMobile() + ", getEmail()=" + getEmail()
+				+ ", getOffice_Address()=" + getOffice_Address() + ", getPin_code()=" + getPin_code() + ", getState()="
+				+ getState() + ", getWhatsApp_Link()=" + getWhatsApp_Link() + ", getInvestNow_Email()="
+				+ getInvestNow_Email() + ", getPassword()=" + getPassword() + ", getOtp()=" + getOtp()
+				+ ", getRefrenceId()=" + getRefrenceId() + ", getDisrefrenceId()=" + getDisrefrenceId()
+				+ ", getClass()=" + getClass() + ", hashCode()=" + hashCode() + ", toString()=" + super.toString()
+				+ "]";
+	}
+
+	public User_RegistrationsForm(Long regId, @NotBlank(message = "Name is mandatory") String name, Date datebirth,
+			Long membership_No, @NotBlank(message = "Profession is mandatory") String profession,
+			@NotBlank(message = "PAN_No is mandatory") String pan, String telephone,
+			@NotBlank(message = "Mobile is mandatory") @Size(min = 10, max = 10) String mobile, String email,
+			String office_Address, String pin_code, String state, String whatsApp_Link, String investNow_Email,
+			@NotBlank(message = "Password is mandatory") String password, String otp, String refrenceId,
+			String disrefrenceId) {
+		super();
 		this.regId = regId;
 		this.name = name;
 		this.datebirth = datebirth;
@@ -202,31 +248,17 @@ public class User_RegistrationsForm
 		this.investNow_Email = investNow_Email;
 		this.password = password;
 		this.otp = otp;
-	}
-
-	@Override
-	public String toString() {
-		return "User_RegistrationsForm{" +
-				"regId=" + regId +
-				", name='" + name + '\'' +
-				", datebirth=" + datebirth +
-				", membership_No=" + membership_No +
-				", profession='" + profession + '\'' +
-				", pan='" + pan + '\'' +
-				", telephone='" + telephone + '\'' +
-				", mobile='" + mobile + '\'' +
-				", email='" + email + '\'' +
-				", office_Address='" + office_Address + '\'' +
-				", pin_code='" + pin_code + '\'' +
-				", state='" + state + '\'' +
-				", whatsApp_Link='" + whatsApp_Link + '\'' +
-				", investNow_Email='" + investNow_Email + '\'' +
-				", password='" + password + '\'' +
-				", otp='" + otp + '\'' +
-				'}';
+		this.refrenceId = refrenceId;
+		this.disrefrenceId = disrefrenceId;
 	}
 
 	public User_RegistrationsForm() {
+		super();
+		// TODO Auto-generated constructor stub
 	}
 
+	
+	
+	
+	
 }

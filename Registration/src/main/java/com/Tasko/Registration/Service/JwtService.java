@@ -8,21 +8,22 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import com.Tasko.Registration.Entity.Subscription_Userdata;
+import com.Tasko.Registration.Repository.Subscritpion_userdataRepository;
 
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 @Component
 public class JwtService {
-
-
     public static final String SECRET = "5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437";
 
 
@@ -61,8 +62,6 @@ public class JwtService {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
-
-
     public String generateToken(String userName) {
         Map<String, Object> claims = new HashMap<>();
         return createToken(claims, userName);
@@ -70,12 +69,14 @@ public class JwtService {
 
     private String createToken(Map<String, Object> claims, String userName)
     {
-        return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(userName)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis()+1000*60*30))
-                .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
+    		long expirationTimeInMillis = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
+            return Jwts.builder()
+                    .setClaims(claims)
+                    .setSubject(userName)
+                    .setIssuedAt(new Date(System.currentTimeMillis()))
+                    .setExpiration(new Date(System.currentTimeMillis() + expirationTimeInMillis))
+                    .signWith(getSignKey(), SignatureAlgorithm.HS256)
+                    .compact();
     }
 
     private Key getSignKey() {

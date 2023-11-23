@@ -1,6 +1,7 @@
 package com.Tasko.Registration.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+
 import jakarta.persistence.*;
 
 import java.util.Date;
@@ -25,89 +26,86 @@ public class Filed_NotFiled
     @JsonFormat(pattern="yyyy-MM-dd")
     private Date lastUpdateDate;
 
-    public Date getLastUpdateDate() {
-        return lastUpdateDate;
-    }
+    private String category;
 
-    public void setLastUpdateDate(Date lastUpdateDate) {
-        this.lastUpdateDate = lastUpdateDate;
-    }
+	public Long getId() {
+		return id;
+	}
 
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public Long getId() {
-        return id;
-    }
+	public Long getUserid() {
+		return userid;
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public void setUserid(Long userid) {
+		this.userid = userid;
+	}
 
-    public Long getUserid() {
-        return userid;
-    }
+	public Long getClientid() {
+		return clientid;
+	}
 
-    public void setUserid(Long userid) {
-        this.userid = userid;
-    }
+	public void setClientid(Long clientid) {
+		this.clientid = clientid;
+	}
 
-    public Long getClientid() {
-        return clientid;
-    }
+	public String getAccountyear() {
+		return accountyear;
+	}
 
-    public void setClientid(Long clientid) {
-        this.clientid = clientid;
-    }
+	public void setAccountyear(String accountyear) {
+		this.accountyear = accountyear;
+	}
 
-    public String getAccountyear() {
-        return accountyear;
-    }
+	public String getFilednotfiled() {
+		return filednotfiled;
+	}
 
-    public void setAccountyear(String accountyear) {
-        this.accountyear = accountyear;
-    }
+	public void setFilednotfiled(String filednotfiled) {
+		this.filednotfiled = filednotfiled;
+	}
 
-    public String getFilednotfiled() {
-        return filednotfiled;
-    }
+	public Date getLastUpdateDate() {
+		return lastUpdateDate;
+	}
 
-    public void setFilednotfiled(String filednotfiled) {
-        this.filednotfiled = filednotfiled;
-    }
+	public void setLastUpdateDate(Date lastUpdateDate) {
+		this.lastUpdateDate = lastUpdateDate;
+	}
 
-    public Filed_NotFiled(Long id, Long userid, Long clientid, String accountyear, String filednotfiled) {
-        this.id = id;
-        this.userid = userid;
-        this.clientid = clientid;
-        this.accountyear = accountyear;
-        this.filednotfiled = filednotfiled;
-    }
+	public String getCategory() {
+		return category;
+	}
 
-    @Override
-    public String toString() {
-        return "Filed_NotFiled{" +
-                "id=" + id +
-                ", userid=" + userid +
-                ", clientid=" + clientid +
-                ", accountyear='" + accountyear + '\'' +
-                ", filednotfiled='" + filednotfiled + '\'' +
-                '}';
-    }
+	public void setCategory(String category) {
+		this.category = category;
+	}
 
-    public Filed_NotFiled() {
-    }
+	public Filed_NotFiled(Long id, Long userid, Long clientid, String accountyear, String filednotfiled,
+			Date lastUpdateDate, String category) {
+		super();
+		this.id = id;
+		this.userid = userid;
+		this.clientid = clientid;
+		this.accountyear = accountyear;
+		this.filednotfiled = filednotfiled;
+		this.lastUpdateDate = lastUpdateDate;
+		this.category = category;
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Filed_NotFiled)) return false;
-        Filed_NotFiled other = (Filed_NotFiled) o;
-        return Objects.equals(this.userid, other.userid) &&
-                Objects.equals(this.clientid, other.clientid) &&
-                Objects.equals(this.accountyear, other.accountyear);
-    }
+	public Filed_NotFiled() {
+		super();
+	}
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(userid, clientid, accountyear);
-    }
+	@Override
+	public String toString() {
+		return "Filed_NotFiled [id=" + id + ", userid=" + userid + ", clientid=" + clientid + ", accountyear="
+				+ accountyear + ", filednotfiled=" + filednotfiled + ", lastUpdateDate=" + lastUpdateDate
+				+ ", category=" + category + "]";
+	}
+    
+    
 }

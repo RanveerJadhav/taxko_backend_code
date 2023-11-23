@@ -1,14 +1,15 @@
 package com.Tasko.Registration.Entity;
 
 
+import java.util.Date;
 import java.util.Optional;
 public class authuser
 {
 
 	private String token;
 	private Optional<User_RegistrationsForm> user;
-
-
+	private Date subenddate;	
+	private boolean value;
 
 	public String getToken() {
 		return token;
@@ -26,9 +27,29 @@ public class authuser
 		this.user = user;
 	}
 
-	public authuser(Optional<User_RegistrationsForm> user, String token) {
+	public Date getSubenddate() {
+		return subenddate;
+	}
+
+	public void setSubenddate(Date subenddate) {
+		this.subenddate = subenddate;
+	}
+
+	public boolean isValue() {
+		return value;
+	}
+
+	public void setValue(boolean value) {
+		this.value = value;
+	}
+
+	public authuser(Optional<User_RegistrationsForm> user, String token, Date subenddate, boolean value) {
+		super();
 		this.token = token;
 		this.user = user;
+		this.subenddate = subenddate;
+		this.value = value;
 	}
+	
 }
 

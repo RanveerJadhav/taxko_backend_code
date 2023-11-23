@@ -2,16 +2,15 @@ package com.Tasko.Registration.Service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
-import com.Tasko.Registration.Entity.Client_Registation_Form;
+import com.Tasko.Registration.Entity.*;
 //import com.Tasko.Registration.Entity.FileData;
-import com.Tasko.Registration.Entity.FileEntity;
-import com.Tasko.Registration.Entity.Filed_NotFiled;
-import com.Tasko.Registration.Entity.User_RegistrationsForm;
 import com.Tasko.Registration.dto.ClientCountsDTO;
 import com.Tasko.Registration.dto.filed_NotfiledDTO;
 import com.Tasko.Registration.error.*;
 import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,12 +19,12 @@ public interface TaskoService
 	public User_RegistrationsForm saveUser(User_RegistrationsForm user) throws Exception;
 	public List<User_RegistrationsForm> FetchUser();
 	public void deleteUserById(Long regId);
-	public Client_Registation_Form saveclient(Client_Registation_Form client) throws UserAlreadyExist, EmailMandatoryException;
+//	public Client_Registation_Form saveclient(Client_Registation_Form client) throws UserAlreadyExist, EmailMandatoryException;
 	public List<Client_Registation_Form> getClientByUserid(Long userid);
 
 
 	public Client_Registation_Form updateClient(Client_Registation_Form client, Long clientId);
-	public List<Client_Registation_Form> getcategory(String category, Long userid);
+	public List<Client_Registation_Form> getcategory( Long userid);
 	public User_RegistrationsForm updateUser(User_RegistrationsForm user, Long regId);
 
     public Client_Registation_Form getClientByClientidUserid(Long userid, Long clientId) throws UserNotFoundException;
@@ -64,6 +63,50 @@ public interface TaskoService
 
 
 	void setpassword(String pan, String newPassword);
+	public GST_FileUpload GSTFileUpload(MultipartFile file, Long userid, Long clientid, String category, String month,
+			String financialYear) throws IOException;
+	
+	public Payment_Details savepaymentDetails(Long userid, MultipartFile image, MultipartFile qrCode, String bank_name,
+			String accountName, Long accountNumber, String ifsc, String upiId, String upiNumber) throws IOException, UserAlreadyExist;
+
+	boolean isOldPasswordCorrect1(String pan, String oldPassword);
+	void updatePassword1(String pan, String newPassword);
+	public void sendEmailwithattachment(String to, String subject, String body);
+	
+	
+	public void sendByEmail(long id, List<Long> sid) throws UserNotFoundException;
+	public Client_Registation_Form getClientByPancategory(String pan, String category) throws UserNotFoundException;
+	public Client_Registation_Form getClientByClientidcategory(Long clientId, String category) throws UserNotFoundException;
+	public Filed_NotFiled_GST GSTupdateFiledNotFiled(Long userid, Long clientid, String month, String financialYear, String category);
+
+	public Client_Payment_Details saveClient_Payment_Details(Client_Payment_Details pay);
+
+	public Map<String, Object> getPaymentSumsByUserid(Long userid,String year);
+	public Map<String, List<Map<String, Object>>> getDataByCategory(Long userid);
+
+
+	public ResponseEntity<Client_Registation_Form> saveclient(Client_Registation_Form client) throws UserAlreadyExist, EmailMandatoryException;
+
+	public ClientPass_Imgdetail savedetail(String pan,String email);
+
+	void sendEmailwithattachmentUserhelp(String to, String subject, String body);
+	
+	void sendEmailwithattachmentContact(String to, String subject, String body);
+	void sendEmailwithattachmentClientprofessional(String to, String subject, String body);
+	
+	void sendEmailwithattachmentforcestop(String to, String subject, String body);
+
+	void sendOTPByEmail1(String pan) throws UserNotFoundException;
+
+	boolean verifyOTP1(String otp) throws OtpNotVaild;
+
+	void resetPassword1(String otp, String newPassword) throws OtpNotVaild;
+
+
+
+	void sendEmailwithattachmenthelp(String to, String subject, String body);
+	public void sendEmailWithAttachment11(String recipient, String subject, String text, MultipartFile attachmentContent,
+			String attachmentFileName);
 
 
 }

@@ -1,0 +1,72 @@
+package com.Tasko.Registration.dto;
+
+import java.util.Date;
+
+import com.Tasko.Registration.Entity.User_RegistrationsForm;
+
+public class RegistrationWithCountResponse {
+	 private User_RegistrationsForm registration;
+	    private Long count;
+	    private boolean status;
+	    private Date substartdatebyuser;
+	    private Date subendtdate;
+		public User_RegistrationsForm getRegistration() {
+			return registration;
+		}
+		public void setRegistration(User_RegistrationsForm registration) {
+			this.registration = registration;
+		}
+		public Long getCount() {
+			return count;
+		}
+		public void setCount(Long count) {
+			this.count = count;
+		}
+		public boolean isStatus() {
+			return status;
+		}
+		public void setStatus(boolean status) {
+			this.status = status;
+		}
+		public Date getSubstartdatebyuser() {
+			return substartdatebyuser;
+		}
+		public void setSubstartdatebyuser(Date substartdatebyuser) {
+			this.substartdatebyuser = substartdatebyuser;
+		}
+		public Date getSubendtdate() {
+			return subendtdate;
+		}
+		public void setSubendtdate(Date subendtdate) {
+			this.subendtdate = subendtdate;
+		}
+		@Override
+		public String toString() {
+			return "RegistrationWithCountResponse [registration=" + registration + ", count=" + count + ", status="
+					+ status + ", substartdatebyuser=" + substartdatebyuser + ", subendtdate=" + subendtdate
+					+ ", getRegistration()=" + getRegistration() + ", getCount()=" + getCount() + ", isStatus()="
+					+ isStatus() + ", getSubstartdatebyuser()=" + getSubstartdatebyuser() + ", getSubendtdate()="
+					+ getSubendtdate() + ", getClass()=" + getClass() + ", hashCode()=" + hashCode() + ", toString()="
+					+ super.toString() + "]";
+		}
+		public RegistrationWithCountResponse(User_RegistrationsForm registration, Long count, boolean status,
+				Date substartdatebyuser, Date subendtdate) {
+			super();
+			this.registration = registration;
+			this.count = count;
+			this.status = status;
+			this.substartdatebyuser = substartdatebyuser;
+			this.subendtdate = subendtdate;
+		}
+		public RegistrationWithCountResponse() {
+			super();
+			// TODO Auto-generated constructor stub
+		}
+		
+	    
+
+	   
+	    
+	    
+	    
+}
