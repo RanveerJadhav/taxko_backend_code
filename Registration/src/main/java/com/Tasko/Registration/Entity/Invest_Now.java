@@ -29,6 +29,8 @@ public class Invest_Now
    private Date date;
    
    private String investNow_Email;
+   
+   private String mobile;
 
 public Long getId() {
 	return id;
@@ -102,19 +104,27 @@ public void setInvestNow_Email(String investNow_Email) {
 	this.investNow_Email = investNow_Email;
 }
 
+public String getMobile() {
+	return mobile;
+}
+
+public void setMobile(String mobile) {
+	this.mobile = mobile;
+}
+
 @Override
 public String toString() {
 	return "Invest_Now [id=" + id + ", userid=" + userid + ", clientid=" + clientid + ", category=" + category
 			+ ", detail=" + detail + ", subject=" + subject + ", name=" + name + ", date=" + date + ", investNow_Email="
-			+ investNow_Email + ", getId()=" + getId() + ", getUserid()=" + getUserid() + ", getClientid()="
-			+ getClientid() + ", getCategory()=" + getCategory() + ", getDetail()=" + getDetail() + ", getSubject()="
-			+ getSubject() + ", getName()=" + getName() + ", getDate()=" + getDate() + ", getInvestNow_Email()="
-			+ getInvestNow_Email() + ", getClass()=" + getClass() + ", hashCode()=" + hashCode() + ", toString()="
-			+ super.toString() + "]";
+			+ investNow_Email + ", mobile=" + mobile + ", getId()=" + getId() + ", getUserid()=" + getUserid()
+			+ ", getClientid()=" + getClientid() + ", getCategory()=" + getCategory() + ", getDetail()=" + getDetail()
+			+ ", getSubject()=" + getSubject() + ", getName()=" + getName() + ", getDate()=" + getDate()
+			+ ", getInvestNow_Email()=" + getInvestNow_Email() + ", getMobile()=" + getMobile() + ", getClass()="
+			+ getClass() + ", hashCode()=" + hashCode() + ", toString()=" + super.toString() + "]";
 }
 
 public Invest_Now(Long id, Long userid, Long clientid, String category, String detail, String subject, String name,
-		Date date, String investNow_Email) {
+		Date date, String investNow_Email, String mobile) {
 	super();
 	this.id = id;
 	this.userid = userid;
@@ -125,12 +135,15 @@ public Invest_Now(Long id, Long userid, Long clientid, String category, String d
 	this.name = name;
 	this.date = date;
 	this.investNow_Email = investNow_Email;
+	this.mobile = mobile;
 }
 
 public Invest_Now() {
 	super();
 	// TODO Auto-generated constructor stub
 }
+
+
 
    
    

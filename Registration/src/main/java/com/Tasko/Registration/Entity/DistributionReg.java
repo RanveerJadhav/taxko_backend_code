@@ -55,6 +55,14 @@ public class DistributionReg
      
      private boolean status;
      
+     private String nomineename;
+     
+     private  String nomieemobile;
+     
+     private  Long salesmanid;
+     
+     private String salesmanagerpan;
+     
      @Column(name ="registrationdate")
      @JsonFormat(pattern="yyyy-MM-dd")
      private Date registrationdate;
@@ -166,6 +174,38 @@ public class DistributionReg
 		this.status = status;
 	}
 
+	public String getNomineename() {
+		return nomineename;
+	}
+
+	public void setNomineename(String nomineename) {
+		this.nomineename = nomineename;
+	}
+
+	public String getNomieemobile() {
+		return nomieemobile;
+	}
+
+	public void setNomieemobile(String nomieemobile) {
+		this.nomieemobile = nomieemobile;
+	}
+
+	public Long getSalesmanid() {
+		return salesmanid;
+	}
+
+	public void setSalesmanid(Long salesmanid) {
+		this.salesmanid = salesmanid;
+	}
+
+	public String getSalesmanagerpan() {
+		return salesmanagerpan;
+	}
+
+	public void setSalesmanagerpan(String salesmanagerpan) {
+		this.salesmanagerpan = salesmanagerpan;
+	}
+
 	public Date getRegistrationdate() {
 		return registrationdate;
 	}
@@ -184,18 +224,91 @@ public class DistributionReg
 
 	@Override
 	public String toString() {
-		return "DistributionReg [id=" + id + ", name=" + name + ", datebirth=" + datebirth + ", profession="
-				+ profession + ", pan=" + pan + ", telephone=" + telephone + ", mobile=" + mobile + ", email=" + email
-				+ ", address=" + address + ", pin_code=" + pin_code + ", state=" + state + ", whatsApp_Link="
-				+ whatsApp_Link + ", status=" + status + ", registrationdate=" + registrationdate + ", password="
-				+ password + ", getId()=" + getId() + ", getName()=" + getName() + ", getDatebirth()=" + getDatebirth()
-				+ ", getProfession()=" + getProfession() + ", getPan()=" + getPan() + ", getTelephone()="
-				+ getTelephone() + ", getMobile()=" + getMobile() + ", getEmail()=" + getEmail() + ", getAddress()="
-				+ getAddress() + ", getPin_code()=" + getPin_code() + ", getState()=" + getState()
-				+ ", getWhatsApp_Link()=" + getWhatsApp_Link() + ", isStatus()=" + isStatus()
-				+ ", getRegistrationdate()=" + getRegistrationdate() + ", getPassword()=" + getPassword()
-				+ ", getClass()=" + getClass() + ", hashCode()=" + hashCode() + ", toString()=" + super.toString()
-				+ "]";
+		StringBuilder builder = new StringBuilder();
+		builder.append("DistributionReg [id=");
+		builder.append(id);
+		builder.append(", name=");
+		builder.append(name);
+		builder.append(", datebirth=");
+		builder.append(datebirth);
+		builder.append(", profession=");
+		builder.append(profession);
+		builder.append(", pan=");
+		builder.append(pan);
+		builder.append(", telephone=");
+		builder.append(telephone);
+		builder.append(", mobile=");
+		builder.append(mobile);
+		builder.append(", email=");
+		builder.append(email);
+		builder.append(", address=");
+		builder.append(address);
+		builder.append(", pin_code=");
+		builder.append(pin_code);
+		builder.append(", state=");
+		builder.append(state);
+		builder.append(", whatsApp_Link=");
+		builder.append(whatsApp_Link);
+		builder.append(", status=");
+		builder.append(status);
+		builder.append(", nomineename=");
+		builder.append(nomineename);
+		builder.append(", nomieemobile=");
+		builder.append(nomieemobile);
+		builder.append(", salesmanid=");
+		builder.append(salesmanid);
+		builder.append(", salesmanagerpan=");
+		builder.append(salesmanagerpan);
+		builder.append(", registrationdate=");
+		builder.append(registrationdate);
+		builder.append(", password=");
+		builder.append(password);
+		builder.append(", getId()=");
+		builder.append(getId());
+		builder.append(", getName()=");
+		builder.append(getName());
+		builder.append(", getDatebirth()=");
+		builder.append(getDatebirth());
+		builder.append(", getProfession()=");
+		builder.append(getProfession());
+		builder.append(", getPan()=");
+		builder.append(getPan());
+		builder.append(", getTelephone()=");
+		builder.append(getTelephone());
+		builder.append(", getMobile()=");
+		builder.append(getMobile());
+		builder.append(", getEmail()=");
+		builder.append(getEmail());
+		builder.append(", getAddress()=");
+		builder.append(getAddress());
+		builder.append(", getPin_code()=");
+		builder.append(getPin_code());
+		builder.append(", getState()=");
+		builder.append(getState());
+		builder.append(", getWhatsApp_Link()=");
+		builder.append(getWhatsApp_Link());
+		builder.append(", isStatus()=");
+		builder.append(isStatus());
+		builder.append(", getNomineename()=");
+		builder.append(getNomineename());
+		builder.append(", getNomieemobile()=");
+		builder.append(getNomieemobile());
+		builder.append(", getSalesmanid()=");
+		builder.append(getSalesmanid());
+		builder.append(", getSalesmanagerpan()=");
+		builder.append(getSalesmanagerpan());
+		builder.append(", getRegistrationdate()=");
+		builder.append(getRegistrationdate());
+		builder.append(", getPassword()=");
+		builder.append(getPassword());
+		builder.append(", getClass()=");
+		builder.append(getClass());
+		builder.append(", hashCode()=");
+		builder.append(hashCode());
+		builder.append(", toString()=");
+		builder.append(super.toString());
+		builder.append("]");
+		return builder.toString();
 	}
 
 	public DistributionReg(Long id, @NotBlank(message = "Name is mandatory") String name, Date datebirth,
@@ -206,7 +319,8 @@ public class DistributionReg
 			@NotBlank(message = "Address is mandatory") String address,
 			@NotBlank(message = "Pin Code is mandatory") String pin_code,
 			@NotBlank(message = "State is mandatory") String state, String whatsApp_Link, boolean status,
-			Date registrationdate, @NotBlank(message = "Password is mandatory") String password) {
+			String nomineename, String nomieemobile, Long salesmanid, String salesmanagerpan, Date registrationdate,
+			@NotBlank(message = "Password is mandatory") String password) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -221,6 +335,10 @@ public class DistributionReg
 		this.state = state;
 		this.whatsApp_Link = whatsApp_Link;
 		this.status = status;
+		this.nomineename = nomineename;
+		this.nomieemobile = nomieemobile;
+		this.salesmanid = salesmanid;
+		this.salesmanagerpan = salesmanagerpan;
 		this.registrationdate = registrationdate;
 		this.password = password;
 	}
@@ -230,6 +348,6 @@ public class DistributionReg
 		// TODO Auto-generated constructor stub
 	}
 
-     
+	
      
 }

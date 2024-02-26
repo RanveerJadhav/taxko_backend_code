@@ -26,6 +26,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import com.Tasko.Registration.filter.JwtAuthFilter;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.Properties;
@@ -35,6 +36,7 @@ import java.util.Properties;
 @EnableWebSecurity
 @EnableMethodSecurity
 @CrossOrigin(origins = "*")
+@EnableTransactionManagement
 public class SecurityConfig
 {
     @Autowired
@@ -56,7 +58,11 @@ public class SecurityConfig
         return https.csrf().disable()
                 .authorizeHttpRequests()
                 .requestMatchers("/createuser","/authenticate","/send-otp","/verify-otp","/reset-password","/client/authenticate"
-                ,"/client/isPasswordNull","/client/SetPassword","/client/send-otp","/client/verify-otp","/authenticate/admin","/subscriptionPacks","/api/master-admin","/save/Client_TaxProfessional_data","/savedistributor","/authenticate/Distribution")
+                ,"/client/isPasswordNull","/client/SetPassword","/client/send-otp","/client/verify-otp","/authenticate/admin","/subscriptionPacks"
+                ,"/api/master-admin","/save/Client_TaxProfessional_data","/savedistributor","/authenticate/Distribution","/taxreturn/pan"
+                ,"/getByPan/{pan}","/TermsOfServiceDownload/{category}","/saveClientTemp","/getClientException","/authenticate/salesmanger","/register/salesmanregister"
+                ,"/send-email/forcontact","/SubUsers/isPasswordNull/{pan}", "/SubUser_SetPassword","/verify_SubUserOtp","/send-otp_ToSubUser","/salesmanager/send-email/withattachment"
+)
                 .permitAll()
                 .and()
                 .cors()

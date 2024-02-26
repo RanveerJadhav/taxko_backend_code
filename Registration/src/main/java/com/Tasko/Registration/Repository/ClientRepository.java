@@ -12,9 +12,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.Tasko.Registration.Entity.Client_Registation_Form;
-import com.Tasko.Registration.Entity.Filed_NotFiled;
-
-import jakarta.persistence.Tuple;
 
 public interface ClientRepository extends JpaRepository<Client_Registation_Form,Long>
 {	
@@ -22,7 +19,8 @@ public interface ClientRepository extends JpaRepository<Client_Registation_Form,
 	List<Client_Registation_Form> findAllByUserid(Long userid);
 
 	Optional<Client_Registation_Form> findByPan(String pan);
-
+	
+	//List<Client_Registation_Form> findByPan11(String pan);
 	Optional<Client_Registation_Form> findByEmail(String email);
 	@Query("SELECT COUNT(c) FROM Client_Registation_Form c WHERE c.email = :email")
 	Long countOfTotalEmailClient(String email);
@@ -109,7 +107,21 @@ public interface ClientRepository extends JpaRepository<Client_Registation_Form,
     List<Client_Registation_Form> findOfIncomeTaxByUserid(Long userid);
 
     
-    @Query(value = "SELECT * FROM Client_Registation_Form c WHERE c.category = 'GST' OR c.category = 'Both' AND c.userid = :userid", nativeQuery = true)
-    List<Client_Registation_Form> findOfGSTByUserid(Long userid);
+//    @Query(value = "SELECT * FROM Client_Registation_Form c WHERE c.category = 'GST' OR c.category = 'Both' AND c.userid = :userid", nativeQuery = true)
+//    List<Client_Registation_Form> findOfGSTByUserid(Long userid);
+	@Query(value ="SELECT * FROM tasko.client_registation_form WHERE pan = :pan", nativeQuery = true)
+	Client_Registation_Form findByPan2(String pan);
 
+    Optional<Client_Registation_Form> findByClientId(Long clientId);
+
+	@Query(value ="SELECT client_id FROM tasko.client_registation_form WHERE userid = :userid And sub_user_id=:subUserid", nativeQuery = true)
+	List<Long> findClientIdByUserIdAndSubUserid(Long userid, Long subUserid);
+
+	List<Client_Registation_Form> findAllByFamilyId(String familyId);
+
+	@Query("SELECT COUNT(DISTINCT familyId) FROM Client_Registation_Form c WHERE c.userid = :userid")
+	Long countByUserId(@Param("userid") Long userid);
+
+	@Query(value = "SELECT * FROM Client_Registation_Form c WHERE (c.category = 'GST' OR c.category = 'Both') AND c.userid = :userid", nativeQuery = true)
+	List<Client_Registation_Form> findOfGSTByUserid(@Param("userid") Long userid);
 }

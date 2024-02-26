@@ -154,6 +154,10 @@ public class DistributionController
 		}
 		distributor.setRegistrationdate(new Date());
 		distributor.setStatus(false);
+		distributor.setNomineename(distributor.getNomineename());
+		distributor.setNomieemobile(distributor.getNomieemobile());
+		distributor.setSalesmanid(distributor.getSalesmanid());
+		distributor.setSalesmanagerpan(distributor.getSalesmanagerpan());
 		distributor.setPassword(passwordEncoder.encode(distributor.getPassword()));
 		return distributionRepo.save(distributor);		
 	}
@@ -521,6 +525,15 @@ public DistributionReg updateDistribution(@RequestBody DistributionReg distribut
       	if (Objects.nonNull(distributionReg.getWhatsApp_Link()) && !"".equalsIgnoreCase(distributionReg.getWhatsApp_Link())) {
       	    existingDistributionReg.setWhatsApp_Link(distributionReg.getWhatsApp_Link());
       	}
+      	if (Objects.nonNull(distributionReg.getNomineename()) && !"".equalsIgnoreCase(distributionReg.getNomineename())) {
+      	    existingDistributionReg.setNomineename(distributionReg.getNomineename());
+      	}
+      	if (Objects.nonNull(distributionReg.getNomieemobile()) && !"".equalsIgnoreCase(distributionReg.getNomieemobile())) {
+      	    existingDistributionReg.setNomieemobile(distributionReg.getNomieemobile());
+      	}
+      	if (distributionReg.getSalesmanid() != null) {
+      	    existingDistributionReg.setSalesmanid(distributionReg.getSalesmanid());
+      	}
   	
           return distributionRepo.save(existingDistributionReg);
    } 
@@ -598,7 +611,7 @@ count2 = (count2 != null) ? count2 : 0L;
 count3 = (count3 != null) ? count3 : 0L;
 count4 = (count4 != null) ? count4 : 0L;
 count5 = (count5 != null) ? count5 : 0L;
-//count6 = (count6 != null) ? count6 : 0L;
+count6 = (count6 != null) ? count6 : 0L;
 System.out.println(count1);
 System.out.println(count2);
 System.out.println(count3);
@@ -613,7 +626,7 @@ professionCounts.add(new SubscriptionCount("Tomorrow", count2));
 professionCounts.add(new SubscriptionCount("Weak", count3));
 professionCounts.add(new SubscriptionCount("Month", count4));
 professionCounts.add(new SubscriptionCount("3 Month", count5));
-professionCounts.add(new SubscriptionCount("6 Month", count5));
+professionCounts.add(new SubscriptionCount("6 Month", count6));
 
 return ResponseEntity.ok(professionCounts);
 } catch (Exception e) {

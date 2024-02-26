@@ -3,13 +3,27 @@ package com.Tasko.Registration.Entity;
 
 import java.util.Date;
 import java.util.Optional;
+
 public class authuser
 {
 
 	private String token;
 	private Optional<User_RegistrationsForm> user;
+
+	private Optional<CA_SubUsers>Sub_user;
 	private Date subenddate;	
 	private boolean value;
+
+	public authuser(User_RegistrationsForm userRegistrationsForm, String jwt, Subscription_Userdata infoData, Optional<CA_SubUsers> caSubuser, boolean isPaid) {
+	}
+
+	public Optional<CA_SubUsers> getSub_user() {
+		return Sub_user;
+	}
+
+	public void setSub_user(Optional<CA_SubUsers> sub_user) {
+		Sub_user = sub_user;
+	}
 
 	public String getToken() {
 		return token;
@@ -50,6 +64,9 @@ public class authuser
 		this.subenddate = subenddate;
 		this.value = value;
 	}
-	
+
+	public authuser(Optional<CA_SubUsers> sub_user) {
+		Sub_user = sub_user;
+	}
 }
 

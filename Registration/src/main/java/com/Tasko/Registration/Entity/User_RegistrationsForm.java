@@ -23,7 +23,7 @@ public class User_RegistrationsForm
 	 @JsonFormat(pattern="yyyy-MM-dd")
 	 private Date datebirth;
 
-     private Long membership_No;
+     private String membership_No;
 
      @NotBlank(message = "Profession is mandatory")
      private String profession;
@@ -50,8 +50,6 @@ public class User_RegistrationsForm
 
      private String whatsApp_Link;
 
-     private String investNow_Email;
-     
      @NotBlank(message = "Password is mandatory")
      private  String password;
 
@@ -60,6 +58,10 @@ public class User_RegistrationsForm
 	private String refrenceId;
 	
 	private  String disrefrenceId;
+	
+	private  String salespersonId;
+	
+	private Long dissalespersonId;
 
 	public Long getRegId() {
 		return regId;
@@ -85,11 +87,11 @@ public class User_RegistrationsForm
 		this.datebirth = datebirth;
 	}
 
-	public Long getMembership_No() {
+	public String getMembership_No() {
 		return membership_No;
 	}
 
-	public void setMembership_No(Long membership_No) {
+	public void setMembership_No(String membership_No) {
 		this.membership_No = membership_No;
 	}
 
@@ -165,14 +167,6 @@ public class User_RegistrationsForm
 		this.whatsApp_Link = whatsApp_Link;
 	}
 
-	public String getInvestNow_Email() {
-		return investNow_Email;
-	}
-
-	public void setInvestNow_Email(String investNow_Email) {
-		this.investNow_Email = investNow_Email;
-	}
-
 	public String getPassword() {
 		return password;
 	}
@@ -205,32 +199,48 @@ public class User_RegistrationsForm
 		this.disrefrenceId = disrefrenceId;
 	}
 
+	public String getSalespersonId() {
+		return salespersonId;
+	}
+
+	public void setSalespersonId(String salespersonId) {
+		this.salespersonId = salespersonId;
+	}
+
+	public Long getDissalespersonId() {
+		return dissalespersonId;
+	}
+
+	public void setDissalespersonId(Long dissalespersonId) {
+		this.dissalespersonId = dissalespersonId;
+	}
+
 	@Override
 	public String toString() {
 		return "User_RegistrationsForm [regId=" + regId + ", name=" + name + ", datebirth=" + datebirth
 				+ ", membership_No=" + membership_No + ", profession=" + profession + ", pan=" + pan + ", telephone="
 				+ telephone + ", mobile=" + mobile + ", email=" + email + ", office_Address=" + office_Address
-				+ ", pin_code=" + pin_code + ", state=" + state + ", whatsApp_Link=" + whatsApp_Link
-				+ ", investNow_Email=" + investNow_Email + ", password=" + password + ", otp=" + otp + ", refrenceId="
-				+ refrenceId + ", disrefrenceId=" + disrefrenceId + ", getRegId()=" + getRegId() + ", getName()="
-				+ getName() + ", getDatebirth()=" + getDatebirth() + ", getMembership_No()=" + getMembership_No()
-				+ ", getProfession()=" + getProfession() + ", getPan()=" + getPan() + ", getTelephone()="
-				+ getTelephone() + ", getMobile()=" + getMobile() + ", getEmail()=" + getEmail()
-				+ ", getOffice_Address()=" + getOffice_Address() + ", getPin_code()=" + getPin_code() + ", getState()="
-				+ getState() + ", getWhatsApp_Link()=" + getWhatsApp_Link() + ", getInvestNow_Email()="
-				+ getInvestNow_Email() + ", getPassword()=" + getPassword() + ", getOtp()=" + getOtp()
-				+ ", getRefrenceId()=" + getRefrenceId() + ", getDisrefrenceId()=" + getDisrefrenceId()
-				+ ", getClass()=" + getClass() + ", hashCode()=" + hashCode() + ", toString()=" + super.toString()
-				+ "]";
+				+ ", pin_code=" + pin_code + ", state=" + state + ", whatsApp_Link=" + whatsApp_Link + ", password="
+				+ password + ", otp=" + otp + ", refrenceId=" + refrenceId + ", disrefrenceId=" + disrefrenceId
+				+ ", salespersonId=" + salespersonId + ", dissalespersonId=" + dissalespersonId + ", getRegId()="
+				+ getRegId() + ", getName()=" + getName() + ", getDatebirth()=" + getDatebirth()
+				+ ", getMembership_No()=" + getMembership_No() + ", getProfession()=" + getProfession() + ", getPan()="
+				+ getPan() + ", getTelephone()=" + getTelephone() + ", getMobile()=" + getMobile() + ", getEmail()="
+				+ getEmail() + ", getOffice_Address()=" + getOffice_Address() + ", getPin_code()=" + getPin_code()
+				+ ", getState()=" + getState() + ", getWhatsApp_Link()=" + getWhatsApp_Link() + ", getPassword()="
+				+ getPassword() + ", getOtp()=" + getOtp() + ", getRefrenceId()=" + getRefrenceId()
+				+ ", getDisrefrenceId()=" + getDisrefrenceId() + ", getSalespersonId()=" + getSalespersonId()
+				+ ", getDissalespersonId()=" + getDissalespersonId() + ", getClass()=" + getClass() + ", hashCode()="
+				+ hashCode() + ", toString()=" + super.toString() + "]";
 	}
 
 	public User_RegistrationsForm(Long regId, @NotBlank(message = "Name is mandatory") String name, Date datebirth,
-			Long membership_No, @NotBlank(message = "Profession is mandatory") String profession,
+			String membership_No, @NotBlank(message = "Profession is mandatory") String profession,
 			@NotBlank(message = "PAN_No is mandatory") String pan, String telephone,
 			@NotBlank(message = "Mobile is mandatory") @Size(min = 10, max = 10) String mobile, String email,
-			String office_Address, String pin_code, String state, String whatsApp_Link, String investNow_Email,
+			String office_Address, String pin_code, String state, String whatsApp_Link,
 			@NotBlank(message = "Password is mandatory") String password, String otp, String refrenceId,
-			String disrefrenceId) {
+			String disrefrenceId, String salespersonId, Long dissalespersonId) {
 		super();
 		this.regId = regId;
 		this.name = name;
@@ -245,11 +255,12 @@ public class User_RegistrationsForm
 		this.pin_code = pin_code;
 		this.state = state;
 		this.whatsApp_Link = whatsApp_Link;
-		this.investNow_Email = investNow_Email;
 		this.password = password;
 		this.otp = otp;
 		this.refrenceId = refrenceId;
 		this.disrefrenceId = disrefrenceId;
+		this.salespersonId = salespersonId;
+		this.dissalespersonId = dissalespersonId;
 	}
 
 	public User_RegistrationsForm() {
@@ -260,5 +271,5 @@ public class User_RegistrationsForm
 	
 	
 	
-	
+
 }

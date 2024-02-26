@@ -1,11 +1,9 @@
 package com.Tasko.Registration.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-
 import jakarta.persistence.*;
 
 import java.util.Date;
-import java.util.Objects;
 
 @Entity
 public class Filed_NotFiled
@@ -15,6 +13,8 @@ public class Filed_NotFiled
     private Long id;
 
     private Long userid;
+
+	private Long subUserid;
 
     private Long clientid;
 
@@ -42,6 +42,14 @@ public class Filed_NotFiled
 
 	public void setUserid(Long userid) {
 		this.userid = userid;
+	}
+
+	public Long getSubUserid() {
+		return subUserid;
+	}
+
+	public void setSubUserid(Long subUserid) {
+		this.subUserid = subUserid;
 	}
 
 	public Long getClientid() {
@@ -84,11 +92,10 @@ public class Filed_NotFiled
 		this.category = category;
 	}
 
-	public Filed_NotFiled(Long id, Long userid, Long clientid, String accountyear, String filednotfiled,
-			Date lastUpdateDate, String category) {
-		super();
+	public Filed_NotFiled(Long id, Long userid, Long subUserid, Long clientid, String accountyear, String filednotfiled, Date lastUpdateDate, String category) {
 		this.id = id;
 		this.userid = userid;
+		this.subUserid = subUserid;
 		this.clientid = clientid;
 		this.accountyear = accountyear;
 		this.filednotfiled = filednotfiled;
@@ -97,15 +104,19 @@ public class Filed_NotFiled
 	}
 
 	public Filed_NotFiled() {
-		super();
 	}
 
 	@Override
 	public String toString() {
-		return "Filed_NotFiled [id=" + id + ", userid=" + userid + ", clientid=" + clientid + ", accountyear="
-				+ accountyear + ", filednotfiled=" + filednotfiled + ", lastUpdateDate=" + lastUpdateDate
-				+ ", category=" + category + "]";
+		return "Filed_NotFiled{" +
+				"id=" + id +
+				", userid=" + userid +
+				", subUserid=" + subUserid +
+				", clientid=" + clientid +
+				", accountyear='" + accountyear + '\'' +
+				", filednotfiled='" + filednotfiled + '\'' +
+				", lastUpdateDate=" + lastUpdateDate +
+				", category='" + category + '\'' +
+				'}';
 	}
-    
-    
 }

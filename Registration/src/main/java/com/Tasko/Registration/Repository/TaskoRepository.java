@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import com.Tasko.Registration.Entity.User_RegistrationsForm;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -89,8 +90,60 @@ public interface TaskoRepository extends JpaRepository<User_RegistrationsForm,Lo
      
      @Query("SELECT COUNT(c) FROM User_RegistrationsForm c WHERE c.profession = 'Other' AND c.disrefrenceId = :disrefrenceId")
    	 Long countdisOfTotalprofession7(String disrefrenceId);
-       
+
+
+    @Query(value = "SELECT * FROM tasko.user_registrations_form WHERE pin_code = :pin_code", nativeQuery = true)
+    List<User_RegistrationsForm> findByPinCode(@Param("pin_code") String pinCode);
     
-   
-     
+    
+    
+         ///////////////////////////////////sales person query///////////////////////////////////////////
+    List<User_RegistrationsForm>findBySalespersonId(String pan);
+    List<User_RegistrationsForm>findByDissalespersonId(Long id);
+    List<User_RegistrationsForm> findByprofessionAndSalespersonId(String profession, String pan);
+    List<User_RegistrationsForm> findByprofessionAndDissalespersonId(String profession, Long id);
+    
+    @Query("SELECT COUNT(c) FROM User_RegistrationsForm c WHERE c.profession = 'Chartered Accountant' AND c.salespersonId = :salespersonId")
+    Long countsalesOfTotalprofession1(String salespersonId);
+    
+    @Query("SELECT COUNT(c) FROM User_RegistrationsForm c WHERE c.profession = 'Tax Consultant' AND c.salespersonId = :salespersonId")
+	 Long countsalesOfTotalprofession2(String salespersonId);
+    
+    @Query("SELECT COUNT(c) FROM User_RegistrationsForm c WHERE c.profession = 'Tax Return Preparer(TRP)'  AND c.salespersonId = :salespersonId")
+	 Long countsalesOfTotalprofession3(String salespersonId);
+    
+    @Query("SELECT COUNT(c) FROM User_RegistrationsForm c WHERE c.profession = 'Accountant'  AND c.salespersonId = :salespersonId")
+	 Long countsalesOfTotalprofession4(String salespersonId);
+    
+    @Query("SELECT COUNT(c) FROM User_RegistrationsForm c WHERE c.profession = 'Certified Consultant'  AND c.salespersonId = :salespersonId")
+  	 Long countsalesOfTotalprofession5(String salespersonId);
+    
+    @Query("SELECT COUNT(c) FROM User_RegistrationsForm c WHERE c.profession = 'Advocate'  AND c.salespersonId = :salespersonId")
+	 Long countsalesOfTotalprofession6(String salespersonId);
+    
+    @Query("SELECT COUNT(c) FROM User_RegistrationsForm c WHERE c.profession = 'Other' AND c.salespersonId = :salespersonId")
+  	 Long countsalesOfTotalprofession7(String salespersonId);
+    
+    @Query("SELECT COUNT(c) FROM User_RegistrationsForm c WHERE c.profession = 'Chartered Accountant' AND c.dissalespersonId = :dissalespersonId")
+    Long countdissalesOfTotalprofession1(Long dissalespersonId);
+    
+    @Query("SELECT COUNT(c) FROM User_RegistrationsForm c WHERE c.profession = 'Tax Consultant' AND c.dissalespersonId = :dissalespersonId")
+	 Long countdissalesOfTotalprofession2(Long dissalespersonId);
+    
+    @Query("SELECT COUNT(c) FROM User_RegistrationsForm c WHERE c.profession = 'Tax Return Preparer(TRP)'  AND c.dissalespersonId = :dissalespersonId")
+	 Long countdissalesOfTotalprofession3(Long dissalespersonId);
+    
+    @Query("SELECT COUNT(c) FROM User_RegistrationsForm c WHERE c.profession = 'Accountant'  AND c.dissalespersonId = :dissalespersonId")
+	 Long countdissalesOfTotalprofession4(Long dissalespersonId);
+    
+    @Query("SELECT COUNT(c) FROM User_RegistrationsForm c WHERE c.profession = 'Certified Consultant'  AND c.dissalespersonId = :dissalespersonId")
+  	 Long countdissalesOfTotalprofession5(Long dissalespersonId);
+    
+    @Query("SELECT COUNT(c) FROM User_RegistrationsForm c WHERE c.profession = 'Advocate'  AND c.dissalespersonId = :dissalespersonId")
+	 Long countdissalesOfTotalprofession6(Long dissalespersonId);
+    
+    @Query("SELECT COUNT(c) FROM User_RegistrationsForm c WHERE c.profession = 'Other' AND c.dissalespersonId = :dissalespersonId")
+  	 Long countdissalesOfTotalprofession7(Long dissalespersonId);
+
+    User_RegistrationsForm findByOtp(String otp);
 }

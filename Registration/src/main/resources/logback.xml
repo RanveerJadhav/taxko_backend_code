@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-	<property name="LOGS" value="/home/ubuntu/backend/"/>
+	<property name="LOGS" value="H:\"></property>
 <!--	/home/ubuntu/backend/   H:\-->
 
 	<appender name="FILE-AUDIT"

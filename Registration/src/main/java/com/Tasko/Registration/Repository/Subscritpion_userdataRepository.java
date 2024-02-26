@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.Tasko.Registration.Entity.Subscription_Userdata;
+import com.Tasko.Registration.Entity.Subscriptionpack_history;
 
 public interface Subscritpion_userdataRepository extends JpaRepository<Subscription_Userdata,Long> {
 	 Optional<Subscription_Userdata> findByPan(String pan);
@@ -73,6 +74,12 @@ public interface Subscritpion_userdataRepository extends JpaRepository<Subscript
 	    Long countOfTotalProfessionInthreemonthreneval( Date startDate, Date currentdate);
 	 @Query("SELECT COUNT(c) FROM Subscription_Userdata c WHERE DATE(c.subendtdate) <= DATE(:startDate) AND DATE(c.subendtdate) >= DATE(:currentdate)")
 	    Long countOfTotalProfessionInsixmonthreneval( Date startDate, Date currentdate);
+	 
+	 @Query("SELECT COUNT(c) FROM Subscription_Userdata c WHERE DATE(c.subendtdate) >= DATE(:enddate) AND DATE(c.subendtdate) <= DATE(:currentdate)")
+	    Long countOfTotalProfessionWithinLast7Daysrenevalbefore( Date enddate, Date currentdate);
+	 
+	 @Query("SELECT COUNT(c) FROM Subscription_Userdata c WHERE DATE(c.subendtdate) <= DATE(:currentdate)")
+	    Long countOfTotalProfessionWithinall(Date currentdate);
 
 	 
 	 
@@ -86,6 +93,8 @@ public interface Subscritpion_userdataRepository extends JpaRepository<Subscript
 	 @Query("SELECT c FROM Subscription_Userdata c WHERE DATE(c.subendtdate) <= DATE(:startDate) AND DATE(c.subendtdate) >= DATE(:currentdate)")
 	 List<Subscription_Userdata> listOfTotalProfessionWithinLast7Daysreneval( Date startDate, Date currentdate);
 	 
+	 @Query("SELECT c FROM Subscription_Userdata c WHERE DATE(c.subendtdate) >= DATE(:startDate) AND DATE(c.subendtdate) <= DATE(:currentdate)")
+	 List<Subscription_Userdata> listOfTotalProfessionWithinLastweek7Daysreneval( Date startDate, Date currentdate);
 	 
 	 @Query("SELECT c FROM Subscription_Userdata c WHERE YEAR(c.subendtdate) = :year AND MONTH(c.subendtdate) = :month AND DATE(c.subendtdate) >= DATE(:currentdate)")
 	 List<Subscription_Userdata> listOfTotalProfessionInCurrentMonthreneval(int year,int month, Date currentdate);
@@ -93,9 +102,13 @@ public interface Subscritpion_userdataRepository extends JpaRepository<Subscript
 	 @Query("SELECT c FROM Subscription_Userdata c WHERE DATE(c.subendtdate) <= DATE(:startDate) AND DATE(c.subendtdate) >= DATE(:currentdate)")
 	 List<Subscription_Userdata> listOfTotalProfessionInthreemonthreneval( Date startDate, Date currentdate);
 	 
+	
+	 
 	 @Query("SELECT c FROM Subscription_Userdata c WHERE DATE(c.subendtdate) <= DATE(:startDate) AND DATE(c.subendtdate) >= DATE(:currentdate)")
 	 List<Subscription_Userdata> listOfTotalProfessionInsixmonthreneval( Date startDate, Date currentdate);
 	 
+	 @Query("SELECT c FROM Subscription_Userdata c WHERE DATE(c.subendtdate) <= DATE(:currentdate)")
+	 List<Subscription_Userdata> listOfTotalProfessionWithinall(Date currentdate);
 	 
 //	 @Query("SELECT COUNT(c) FROM Subscription_Userdata c WHERE YEAR(c.subendtdate) = :year AND MONTH(c.subendtdate) <= :month")
 //	 Long countOfTotalProfessionInthreemonthreneval(int year,int month);
@@ -155,8 +168,6 @@ public interface Subscritpion_userdataRepository extends JpaRepository<Subscript
 	 @Query("SELECT c FROM Subscription_Userdata c WHERE DATE(c.subendtdate) <= DATE(:startDate) AND DATE(c.subendtdate) >= DATE(:currentdate) AND c.disrefrenceId = :disrefrenceId")
 	 List<Subscription_Userdata> listOfdisTotalProfessionInsixmonthreneval( Date startDate,String disrefrenceId, Date currentdate);
 	 
-	 
-	 
 	//////////////////////////distrubution all business query////////////////////////////
 	  
 	 @Query("SELECT COUNT(c) FROM Subscription_Userdata c WHERE DATE(c.substartdatebyadmin) = DATE(:date) AND c.disrefrenceId = :disrefrenceId")
@@ -196,8 +207,92 @@ public interface Subscritpion_userdataRepository extends JpaRepository<Subscript
 	 @Query("SELECT c FROM Subscription_Userdata c WHERE YEAR(c.substartdatebyadmin) = :previousYear AND c.disrefrenceId = :disrefrenceId")
 	 List<Subscription_Userdata>  listOfdisTotalProfessionInPreviousYear(int previousYear,String disrefrenceId);
 
+	 
+	 
+	             //////////////////////salesmanager dashboard api////////////////////////////////////////////
+	 
+	 
+	 /////////////////////////////////personal ca for salesperson//////////////////////////////////
+	 @Query("SELECT COUNT(c) FROM Subscription_Userdata c WHERE DATE(c.subendtdate) = DATE(:date) AND c.salespersonId = :salespersonId")
+	    Long countOfsalestodayRenewal(Date date,String salespersonId);
+	 
+	 
+	 @Query("SELECT COUNT(c) FROM Subscription_Userdata c WHERE DATE(c.subendtdate) = DATE(:date) AND c.salespersonId = :salespersonId")
+	    Long countOfsalesyestardayRenewal(Date date,String salespersonId);
+	 
+	 @Query("SELECT COUNT(c) FROM Subscription_Userdata c WHERE DATE(c.subendtdate) <= DATE(:startDate) AND DATE(c.subendtdate) >= DATE(:currentdate) AND c.salespersonId = :salespersonId")
+	 Long countOfsalesTotalProfessionWithinLast7Daysreneval(Date startDate, String salespersonId, Date currentdate);
+
+
+	 @Query("SELECT COUNT(c) FROM Subscription_Userdata c WHERE YEAR(c.subendtdate) = :year AND MONTH(c.subendtdate) = :month AND DATE(c.subendtdate) >= DATE(:currentdate)  AND c.salespersonId = :salespersonId")
+	 Long countOfsalesTotalProfessionInCurrentMonthreneval(int year,int month,String salespersonId, Date currentdate);
+	 
+	 @Query("SELECT COUNT(c) FROM Subscription_Userdata c WHERE DATE(c.subendtdate) <= DATE(:startDate) AND DATE(c.subendtdate) >= DATE(:currentdate)  AND c.salespersonId = :salespersonId")
+	    Long countOfsalesTotalProfessionInthreemonthreneval( Date startDate,String salespersonId, Date currentdate);
+	 @Query("SELECT COUNT(c) FROM Subscription_Userdata c WHERE DATE(c.subendtdate) <= DATE(:startDate) AND DATE(c.subendtdate) >= DATE(:currentdate)  AND c.salespersonId = :salespersonId")
+	    Long countOfsalesTotalProfessionInsixmonthreneval( Date startDate,String salespersonId, Date currentdate);
+	 
+	 
+	 @Query("SELECT c FROM Subscription_Userdata c WHERE DATE(c.subendtdate) = DATE(:date) AND c.salespersonId = :salespersonId ")
+	 List<Subscription_Userdata>  listOfsalestodaysubscription(Date date,String salespersonId);
+	 
+	 @Query("SELECT c FROM Subscription_Userdata c WHERE DATE(c.subendtdate) = DATE(:date) AND c.salespersonId = :salespersonId")
+	 List<Subscription_Userdata> listOfsalesyestardaysubscription(Date date,String salespersonId);
+	 
+	 @Query("SELECT c FROM Subscription_Userdata c WHERE DATE(c.subendtdate) <= DATE(:startDate) AND DATE(c.subendtdate) >= DATE(:currentdate) AND c.salespersonId = :salespersonId")
+	 List<Subscription_Userdata> listofsalesweeksubscription( Date startDate,String salespersonId, Date currentdate);
+	 
+	 
+	 @Query("SELECT c FROM Subscription_Userdata c WHERE YEAR(c.subendtdate) = :year AND MONTH(c.subendtdate) = :month AND DATE(c.subendtdate) >= DATE(:currentdate) AND c.salespersonId = :salespersonId")
+	 List<Subscription_Userdata> listOfsalesTotalProfessionInCurrentMonthreneval(int year,int month,String salespersonId, Date currentdate);
+	 
+	 @Query("SELECT c FROM Subscription_Userdata c WHERE DATE(c.subendtdate) <= DATE(:startDate) AND DATE(c.subendtdate) >= DATE(:currentdate) AND c.salespersonId = :salespersonId")
+	 List<Subscription_Userdata> listOfsalesTotalProfessionInthreemonthreneval( Date startDate,String salespersonId, Date currentdate);
+	 
+	 @Query("SELECT c FROM Subscription_Userdata c WHERE DATE(c.subendtdate) <= DATE(:startDate) AND DATE(c.subendtdate) >= DATE(:currentdate) AND c.salespersonId = :salespersonId")
+	 List<Subscription_Userdata> listOfsalesTotalProfessionInsixmonthreneval( Date startDate,String salespersonId, Date currentdate);
+	 
+	 //////////////////////////////ca for underdistributor and sales manager///////////////////////////////////////////
 	
+	 @Query("SELECT COUNT(c) FROM Subscription_Userdata c WHERE DATE(c.subendtdate) = DATE(:date) AND c.dissalespersonId = :dissalespersonId")
+	    Long countOfdissalestodayRenewal(Date date,Long dissalespersonId);
 	 
 	 
+	 @Query("SELECT COUNT(c) FROM Subscription_Userdata c WHERE DATE(c.subendtdate) = DATE(:date) AND c.dissalespersonId = :dissalespersonId")
+	    Long countOfdissalesyestardayRenewal(Date date,Long dissalespersonId);
 	 
+	 @Query("SELECT COUNT(c) FROM Subscription_Userdata c WHERE DATE(c.subendtdate) <= DATE(:startDate) AND DATE(c.subendtdate) >= DATE(:currentdate) AND c.dissalespersonId = :dissalespersonId")
+	 Long countOfdissalesTotalProfessionWithinLast7Daysreneval(Date startDate, Long dissalespersonId, Date currentdate);
+
+
+	 @Query("SELECT COUNT(c) FROM Subscription_Userdata c WHERE YEAR(c.subendtdate) = :year AND MONTH(c.subendtdate) = :month AND DATE(c.subendtdate) >= DATE(:currentdate)  AND c.dissalespersonId = :dissalespersonId")
+	 Long countOfdissalesTotalProfessionInCurrentMonthreneval(int year,int month,Long dissalespersonId, Date currentdate);
+	 
+	 @Query("SELECT COUNT(c) FROM Subscription_Userdata c WHERE DATE(c.subendtdate) <= DATE(:startDate) AND DATE(c.subendtdate) >= DATE(:currentdate)  AND c.dissalespersonId = :dissalespersonId")
+	    Long countOfdissalesTotalProfessionInthreemonthreneval( Date startDate,Long dissalespersonId, Date currentdate);
+	 @Query("SELECT COUNT(c) FROM Subscription_Userdata c WHERE DATE(c.subendtdate) <= DATE(:startDate) AND DATE(c.subendtdate) >= DATE(:currentdate)  AND c.dissalespersonId = :dissalespersonId")
+	    Long countOfdissalesTotalProfessionInsixmonthreneval( Date startDate,Long dissalespersonId, Date currentdate);
+	 
+	 @Query("SELECT c FROM Subscription_Userdata c WHERE DATE(c.subendtdate) = DATE(:date) AND c.dissalespersonId = :dissalespersonId ")
+	 List<Subscription_Userdata>  listOfdissalestodaysubscription(Date date,Long dissalespersonId);
+	 
+	 @Query("SELECT c FROM Subscription_Userdata c WHERE DATE(c.subendtdate) = DATE(:date) AND c.dissalespersonId = :dissalespersonId")
+	 List<Subscription_Userdata> listOfdissalesyestardaysubscription(Date date,Long dissalespersonId);
+	 
+	 @Query("SELECT c FROM Subscription_Userdata c WHERE DATE(c.subendtdate) <= DATE(:startDate) AND DATE(c.subendtdate) >= DATE(:currentdate) AND c.dissalespersonId = :dissalespersonId")
+	 List<Subscription_Userdata> listofdissalesweeksubscription( Date startDate,Long dissalespersonId, Date currentdate);
+	 
+	 
+	 @Query("SELECT c FROM Subscription_Userdata c WHERE YEAR(c.subendtdate) = :year AND MONTH(c.subendtdate) = :month AND DATE(c.subendtdate) >= DATE(:currentdate) AND c.dissalespersonId = :dissalespersonId")
+	 List<Subscription_Userdata> listOfdissalesTotalProfessionInCurrentMonthreneval(int year,int month,Long dissalespersonId, Date currentdate);
+	 
+	 @Query("SELECT c FROM Subscription_Userdata c WHERE DATE(c.subendtdate) <= DATE(:startDate) AND DATE(c.subendtdate) >= DATE(:currentdate) AND c.dissalespersonId = :dissalespersonId")
+	 List<Subscription_Userdata> listOfdissalesTotalProfessionInthreemonthreneval( Date startDate,Long dissalespersonId, Date currentdate);
+	 
+	 @Query("SELECT c FROM Subscription_Userdata c WHERE DATE(c.subendtdate) <= DATE(:startDate) AND DATE(c.subendtdate) >= DATE(:currentdate) AND c.dissalespersonId = :dissalespersonId")
+	 List<Subscription_Userdata> listOfdissalesTotalProfessionInsixmonthreneval( Date startDate,Long dissalespersonId, Date currentdate);
+
+	List<Subscription_Userdata> findBySalespersonId(String pan);
+
+	List<Subscription_Userdata> findByDissalespersonId(Long id);	 
 }

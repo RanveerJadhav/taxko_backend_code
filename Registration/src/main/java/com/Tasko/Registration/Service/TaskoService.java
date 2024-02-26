@@ -9,6 +9,8 @@ import com.Tasko.Registration.Entity.*;
 import com.Tasko.Registration.dto.ClientCountsDTO;
 import com.Tasko.Registration.dto.filed_NotfiledDTO;
 import com.Tasko.Registration.error.*;
+import com.razorpay.RazorpayException;
+
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartException;
@@ -72,7 +74,7 @@ public interface TaskoService
 	boolean isOldPasswordCorrect1(String pan, String oldPassword);
 	void updatePassword1(String pan, String newPassword);
 	public void sendEmailwithattachment(String to, String subject, String body);
-	
+	public void sendEmailinvite(String to, String subject, String body);
 	
 	public void sendByEmail(long id, List<Long> sid) throws UserNotFoundException;
 	public Client_Registation_Form getClientByPancategory(String pan, String category) throws UserNotFoundException;
@@ -81,9 +83,8 @@ public interface TaskoService
 
 	public Client_Payment_Details saveClient_Payment_Details(Client_Payment_Details pay);
 
-	public Map<String, Object> getPaymentSumsByUserid(Long userid,String year);
+	public Map<String, Object> getPaymentSumsByUserid(Long userid);
 	public Map<String, List<Map<String, Object>>> getDataByCategory(Long userid);
-
 
 	public ResponseEntity<Client_Registation_Form> saveclient(Client_Registation_Form client) throws UserAlreadyExist, EmailMandatoryException;
 
@@ -109,4 +110,25 @@ public interface TaskoService
 			String attachmentFileName);
 
 
+    String sendWhatsAppMessage(String to, String message);
+	boolean isOldPasswordCorrect2(String pan, String oldPassword);
+	void updatePassword2(String pan, String newPassword);
+	public String createOrder(double amount, String currency) throws RazorpayException;
+
+    void sendOTPByEmailToSubUser(String pan) throws UserNotFoundException;
+
+	void SubUserResetPassword(String otp, String newPassword)throws OtpNotVaild;
+
+	List<filed_NotfiledDTO> getFileCountsByUseridAndsubUserid(Long userid, Long subUserid)throws UserNotFoundException;
+
+	Map<String, List<Map<String, Object>>> getGSTDataByCategoryAndSubUSerid(Long userid, Long subUserid);
+
+    Map<String, Object> checkPanStatus(String pan)throws UserNotFoundException;
+
+
+	boolean changePassword(String username, String oldPassword, String newPassword);
+	
+	boolean isOldPasswordCorrect3(String username, String oldPassword);
+
+	void updatePassword3(String username, String newPassword);
 }

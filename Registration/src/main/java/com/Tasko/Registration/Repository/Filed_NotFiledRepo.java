@@ -46,4 +46,7 @@ public interface Filed_NotFiledRepo extends JpaRepository<Filed_NotFiled,Long>
 
 
     List<Filed_NotFiled> findByUseridAndAccountyearAndFilednotfiled(Long userid, String accountyear, String yes);
+
+    @Query("SELECT MAX(fn.lastUpdateDate) FROM Filed_NotFiled fn WHERE fn.userid = :userid AND fn.subUserid = :subUserid")
+    Optional<LocalDate> findMaxLastUpdateDateByUseridAndSubUserid(@Param("userid") Long userid, @Param("subUserid") Long subUserid);
 }

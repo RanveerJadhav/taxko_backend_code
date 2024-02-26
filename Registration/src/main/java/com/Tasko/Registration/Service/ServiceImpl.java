@@ -1,7 +1,6 @@
 package com.Tasko.Registration.Service;
 
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
@@ -14,15 +13,18 @@ import com.Tasko.Registration.dto.filed_NotfiledDTO;
 import com.Tasko.Registration.error.*;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
-
+import com.razorpay.RazorpayClient;
+import com.razorpay.RazorpayException;
+import com.twilio.Twilio;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.util.ByteArrayDataSource;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
@@ -33,8 +35,17 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import com.razorpay.Order;
+import com.razorpay.RazorpayClient;
+import com.razorpay.RazorpayException;
+import com.razorpay.Utils;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
-import java.io.File;
+import com.twilio.rest.api.v2010.account.Message;
+
 import java.io.IOException;
 
 @Service
@@ -55,6 +66,9 @@ public class ServiceImpl implements TaskoService
    @Autowired
    private FileRepository fileRepository;
 
+	@Autowired
+	private Client_Registation_Form_Temp_Repo tempRepo;
+
    @Autowired
 	private Filed_NotFiledRepo filed_notFiledRepo;
    
@@ -70,21 +84,16 @@ public class ServiceImpl implements TaskoService
 	private Subscription_packRepository subscriptionPackRepository;
 	@Autowired
 	private Subscritpion_userdataRepository subscritpion_userdataRepository;
+	@Autowired
+    private Salesman_RegisterRepository salesmanRegisterRepository;
 
+	@Autowired
+	private CA_SubUsersRepo caSubUsersRepo;
 
+	@Autowired
+	private  master_adminRepository master_adminRepository;
 	@Override
 	public User_RegistrationsForm saveUser(User_RegistrationsForm user) throws UserAlreadyExist, EmailMandatoryException {
-
-		Optional<User_RegistrationsForm> existingUserWithEmail = taskoRepository.findByEmail(user.getEmail());
-
-		if(taskoRepository.findByPan(user.getPan()).isPresent())
-		{
-			throw new UserAlreadyExist("PAN Already Exist");
-		}
-		if (existingUserWithEmail.isPresent())
-		{
-			throw new EmailMandatoryException("Email Already Exist");
-		}
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
 		return taskoRepository.save(user);
 	}
@@ -108,6 +117,34 @@ public void deleteUserById(Long regId)
 
 	public ResponseEntity<Client_Registation_Form> saveclient(Client_Registation_Form client) throws UserAlreadyExist, EmailMandatoryException
 	{
+		SimpleMailMessage mailMessage = new SimpleMailMessage();
+		mailMessage.setTo(client.getEmail());
+		mailMessage.setSubject("Welcome to our platform!");
+		mailMessage.setText("Dear " + client.getName() + ",\n\n" +
+				"I hope this email finds you well.\n\n" +
+				"I'm pleased to inform you that your account has been successfully created on TAXKO, a cutting-edge cloud-based platform designed to simplify post-filing data management for our esteemed clients like you.\n\n" +
+				"With TAXKO, you now have access to a range of powerful features to streamline your tax-related processes, ensuring efficiency, accuracy, and compliance every step of the way. From organizing and accessing your financial data to collaborating seamlessly with our team, TAXKO is here to make your tax journey smoother than ever before.\n\n" +
+				"What TAXKO offers you:\n" +
+				"Effortless Data Access: Access your financial data securely from anywhere, at any time.\n" +
+				"Streamlined Collaboration: Collaborate with us seamlessly to ensure accuracy and efficiency in your tax filings.\n" +
+				"Automated Reminders: Stay updated on important deadlines and tasks with automated reminders, ensuring timely compliance.\n\n" +
+				"To get started, simply click on the link below to log in to your TAXKO account using the credentials provided: [Insert Login Link]\n\n" +
+				"Should you have any questions or require assistance with navigating the platform, please don't hesitate to reach out to me directly. I'm here to support you every step of the way and ensure your experience with TAXKO is nothing short of exceptional.\n\n" +
+				"Thank you for entrusting us with your tax needs. We're excited to embark on this journey together and look forward to making your tax management experience as smooth and efficient as possible.\n\n" +
+				"Kindly visit https://taxko.in for detailed understanding about product.\n\n" +
+				"Best Regards,\n\n"+
+				"Team TAXKO"
+		);
+
+
+		javaMailSender.send(mailMessage);
+		
+		List<Client_Registation_Form> existingpancount = clientRepository.findByPan1(client.getPan());
+		int count = existingpancount.size();
+		if(count>=2)
+		{
+			throw new UserAlreadyExist(client.getCategory() + "Already Exists");
+		}
 		Optional<Client_Registation_Form> existingpan = clientRepository.findByPan(client.getPan());
 		Long totalemail = clientRepository.countOfTotalEmailClient(client.getEmail());
 		totalemail = (totalemail != null) ? totalemail : 0L;
@@ -134,6 +171,16 @@ public void deleteUserById(Long regId)
 		    if (existingpan.isPresent() && existingpan.get().getCategory().equals(client.getCategory())) {
 		        throw new UserAlreadyExist(client.getCategory() + " Already Exists");
 		    }
+		    if (existingpan.isPresent() && existingpan.get().getCategory().equals("Both")) {
+		        throw new UserAlreadyExist(client.getCategory() + " Already Exists");
+		    }
+		    if (existingpan.isPresent() && existingpan.get().getCategory().equals("Both")) {
+		        throw new UserAlreadyExist(client.getCategory() + " Already Exists");
+		    }
+		    if (existingpan.isPresent() && client.getCategory().equals("Both") && existingpan.get().getUserid() != client.getUserid()) {
+		        throw new UserAlreadyExist(client.getCategory() + " Already Exists");
+		    }
+
 		    if (existingEmail.isPresent() && existingEmail.get().getCategory().equals(client.getCategory())) {
 		        throw new EmailMandatoryException("You Already Exist");
 		    }
@@ -147,7 +194,6 @@ public void deleteUserById(Long regId)
 			Client_Registation_Form information =existingpan.get();
 			if(!information.getCategory().equals("Income_Tax"))
 			{
-
 				for (int i = currentYear; i > currentYear - 5; i--)
 				{
 					Filed_NotFiled filedNotFiled = new Filed_NotFiled();
@@ -288,88 +334,88 @@ public void deleteUserById(Long regId)
 
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	@Override
-	public Client_Registation_Form updateClient(Client_Registation_Form client,Long clientId)
+	public Client_Registation_Form updateClient(Client_Registation_Form client, Long clientId)
 	{
-		Client_Registation_Form c=clientRepository.findById(clientId).get();
+		Client_Registation_Form c = clientRepository.findById(clientId).orElse(null);
 
-		if(Objects.nonNull(client.getName()) &&
-				!"".equalsIgnoreCase(client.getName()))
-		{
+		if (Objects.nonNull(client.getName()) && !client.getName().trim().isEmpty()) {
 			c.setName(client.getName());
+		} else {
+			c.setName(null);
 		}
 
-		if(Objects.nonNull(client.getProfession()) &&
-				!"".equalsIgnoreCase(client.getProfession()))
-		{
+		if (Objects.nonNull(client.getProfession()) && !client.getProfession().trim().isEmpty()) {
 			c.setProfession(client.getProfession());
+		} else {
+			c.setProfession(null);
 		}
 
-		if(Objects.nonNull(client.getPan()) &&
-				!"".equalsIgnoreCase(client.getPan()))
-		{
-			c.setPan(client.getPan());
-		}
 
-		if(Objects.nonNull(client.getEmail()) &&
-				!"".equalsIgnoreCase(client.getEmail()))
-		{
+		if (Objects.nonNull(client.getEmail()) && !client.getEmail().trim().isEmpty()) {
 			c.setEmail(client.getEmail());
+		} else {
+			c.setEmail(null);
 		}
 
-		if(Objects.nonNull(client.getMobile()) &&
-				!"".equalsIgnoreCase(client.getMobile()))
+		//---------------------ClientPass_Imgdetail change email-------------------
+		ClientPass_Imgdetail imgDetail = clientPassRepository.findByPan1(c.getPan());
+		if (imgDetail != null)
 		{
+			imgDetail.setEmail(client.getEmail()); // Assuming you want to update email with pan
+			clientPassRepository.save(imgDetail);
+		}
+
+		if (Objects.nonNull(client.getMobile()) && !client.getMobile().trim().isEmpty()) {
 			c.setMobile(client.getMobile());
+		} else {
+			c.setMobile(null);
 		}
 
-		if(Objects.nonNull(client.getDob()))
-		{
+		if (Objects.nonNull(client.getDob())) {
 			c.setDob(client.getDob());
+		} else {
+			c.setDob(null);
 		}
 
-		if(Objects.nonNull(client.getTelephone()) &&
-				!"".equalsIgnoreCase(client.getTelephone()))
-		{
+		if (Objects.nonNull(client.getTelephone()) && !client.getTelephone().trim().isEmpty()) {
 			c.setTelephone(client.getTelephone());
+		} else {
+			c.setTelephone(null);
 		}
 
-		if(Objects.nonNull(client.getAddress()) &&
-				!"".equalsIgnoreCase(client.getAddress()))
-		{
+		if (Objects.nonNull(client.getAddress()) && !client.getAddress().trim().isEmpty()) {
 			c.setAddress(client.getAddress());
+		} else {
+			c.setAddress(null);
 		}
 
-		if(Objects.nonNull(client.getPin_code()) &&
-				!"".equalsIgnoreCase(client.getPin_code()))
-		{
+		if (Objects.nonNull(client.getPin_code()) && !client.getPin_code().trim().isEmpty()) {
 			c.setPin_code(client.getPin_code());
+		} else {
+			c.setPin_code(null);
 		}
 
-		if(Objects.nonNull(client.getState()) &&
-				!"".equalsIgnoreCase(client.getState()))
-		{
+		if (Objects.nonNull(client.getState()) && !client.getState().trim().isEmpty()) {
 			c.setState(client.getState());
+		} else {
+			c.setState(null);
 		}
 
-		if(Objects.nonNull(client.getCategory()) &&
-				!"".equalsIgnoreCase(client.getCategory()))
-		{
-			c.setCategory(client.getCategory());
-		}
-
-		if(Objects.nonNull(client.getResidential_status()) &&
-				!"".equalsIgnoreCase(client.getResidential_status()))
-		{
+		if (Objects.nonNull(client.getResidential_status()) && !client.getResidential_status().trim().isEmpty()) {
 			c.setResidential_status(client.getResidential_status());
+		} else {
+			c.setResidential_status(null);
 		}
 
-		if(Objects.nonNull(client.getUserid()))
-		{
-			c.setUserid(client.getUserid());
+		if (Objects.nonNull(client.getInvest_now_email()) && !client.getInvest_now_email().trim().isEmpty()) {
+			c.setInvest_now_email(client.getInvest_now_email());
+		} else {
+			c.setInvest_now_email(null);
 		}
 
 		return clientRepository.save(c);
 	}
+
 
 	@Override
 	public List<Client_Registation_Form> getcategory( Long userid)
@@ -465,11 +511,11 @@ public void deleteUserById(Long regId)
 			u.setWhatsApp_Link(user.getWhatsApp_Link());
 		}
 
-		if(Objects.nonNull(user.getInvestNow_Email()) &&
-				!"".equalsIgnoreCase(user.getInvestNow_Email()))
-		{
-			u.setInvestNow_Email(user.getInvestNow_Email());
-		}
+//		if(Objects.nonNull(user.getInvestNow_Email()) &&
+//				!"".equalsIgnoreCase(user.getInvestNow_Email()))
+//		{
+//			u.setInvestNow_Email(user.getInvestNow_Email());
+//		}
 
 		return taskoRepository.save(u);
 	}
@@ -791,6 +837,10 @@ public void setpassword(String pan, String newPassword) {
 		message.setText(body);
 		javaMailSender.send(message);
 	}
+	
+	
+	
+	
 	public boolean verifyOTP(String otp) throws OtpNotVaild
 	{
 		User_RegistrationsForm user = forgetRepo.findByOtp(otp);
@@ -918,6 +968,25 @@ public void setpassword(String pan, String newPassword) {
 		user2.setPassword(BCrypt.hashpw(newPassword, BCrypt.gensalt()));
 		clientPassRepository.save(user2);
 	}
+	
+	///////////////////////////////chage password for salesmanger//////////////////////
+///////////////////change password for client////////////////////////////////////////////
+//---------------------Change Password---------------------
+public boolean isOldPasswordCorrect2(String pan, String oldPassword)
+{   Optional<Salesman_Register> user = salesmanRegisterRepository.findByPan(pan);
+Salesman_Register user2 = user.get();
+return BCrypt.checkpw(oldPassword, user2.getPassword());
+}
+
+// Method to update the password
+public void updatePassword2(String pan, String newPassword)
+{
+Optional<Salesman_Register> user = salesmanRegisterRepository.findByPan(pan);
+Salesman_Register user2 = user.get();
+user2.setPassword(BCrypt.hashpw(newPassword, BCrypt.gensalt()));
+salesmanRegisterRepository.save(user2);
+}
+///////////////////////////////////////////////
 	public void  sendEmailwithattachment(String to, String subject, String body)
 	{
 
@@ -1013,36 +1082,39 @@ public void setpassword(String pan, String newPassword) {
 			return record;
 			
 		}
-		
 
 
-		public Map<String, List<Map<String, Object>>> getDataByCategory(Long userid) {
-		    Calendar calendar = Calendar.getInstance();
-		    int financialYear = calendar.get(Calendar.YEAR);
-		    String financialYearString = String.valueOf(financialYear);
 
-		    List<Object[]> results = filed_GST_repo.getDataByCategoryAndFinancialYear(userid, financialYearString);
+	public Map<String, List<Map<String, Object>>> getDataByCategory(Long userid)
+	{
+		Calendar calendar = Calendar.getInstance();
+		int currentYear = calendar.get(Calendar.YEAR);
+		int previousYear = currentYear - 1;
+		String currentFinancialYearString = String.valueOf(currentYear);
+		String previousFinancialYearString = String.valueOf(previousYear);
 
-		    Map<String, List<Map<String, Object>>> dataByCategory = new LinkedHashMap<>();
+		List<Object[]> results = filed_GST_repo.getDataByCategoryAndFinancialYear(userid, currentFinancialYearString, previousFinancialYearString);
 
-		    for (Object[] result : results) {
-		        String category = (String) result[0];
-		        String monthYear = (String) result[1];
-		        Long filedCount = ((Number) result[2]).longValue();
-		        Long notFiledCount = ((Number) result[3]).longValue();
+		Map<String, List<Map<String, Object>>> dataByCategory = new LinkedHashMap<>();
 
-		        Map<String, Object> entry = new HashMap<>();
-		        entry.put("category", category);
-		        entry.put("month", monthYear);
-		        entry.put("filed", filedCount);
-		        entry.put("notfiled", notFiledCount);
+		for (Object[] result : results) {
+			String category = (String) result[0];
+			String monthYear = (String) result[1];
+			Long filedCount = ((Number) result[2]).longValue();
+			Long notFiledCount = ((Number) result[3]).longValue();
 
-		        // Check if the category already exists in the map; if not, create a new list
-		        dataByCategory.computeIfAbsent(category, k -> new ArrayList<>()).add(entry);
-		    }
+			Map<String, Object> entry = new HashMap<>();
+			entry.put("category", category);
+			entry.put("month", monthYear);
+			entry.put("filed", filedCount);
+			entry.put("notfiled", notFiledCount);
 
-		    return dataByCategory;
+			// Check if the category already exists in the map; if not, create a new list
+			dataByCategory.computeIfAbsent(category, k -> new ArrayList<>()).add(entry);
 		}
+
+		return dataByCategory;
+	}
 
 
 
@@ -1061,9 +1133,9 @@ public void setpassword(String pan, String newPassword) {
 
 
 	/////////////////////////////////////////////Sum Of Client_Payment_Details////////////////////////////////////////////////
-	public Map<String, Object> getPaymentSumsByUserid(Long userid,String year)
+	public Map<String, Object> getPaymentSumsByUserid(Long userid)
 	{
-		List<Client_Payment_Details> payments = client_Payment_Details_Repo.findByUseridAndYear(userid,year);
+		List<Client_Payment_Details> payments = client_Payment_Details_Repo.findByUserid(userid);
 
 		Long totalPaymentSum = payments.stream().mapToLong(Client_Payment_Details::getTotalPayment).sum();
 		Long receivedPaymentSum = payments.stream().mapToLong(Client_Payment_Details::getReceivedPayment).sum();
@@ -1075,13 +1147,12 @@ public void setpassword(String pan, String newPassword) {
 		sums.put("receivedPayment", receivedPaymentSum);
 		sums.put("pendingPayment", pendingPaymentSum);
 		sums.put("discountPayment", discountPaymentSum);
-		
+
 
 
 
 		return sums;
 	}
-
 
 
 
@@ -1199,6 +1270,7 @@ public void setpassword(String pan, String newPassword) {
 	}
 
 
+
 	@Override
 	public void sendEmailwithattachmentContact(String to, String subject, String body) {
 		MimeMessage message = javaMailSender.createMimeMessage();
@@ -1271,10 +1343,298 @@ public void setpassword(String pan, String newPassword) {
 		}
 		
 	}
-	
-	
-		
+
+
+	@Value("${twilio.accountSid}")
+	private String accountSid;
+
+	@Value("${twilio.authToken}")
+	private String authToken;
+
+	@Value("${twilio.whatsapp.number}")
+	private String twilioWhatsappNumber;
+
+	@Override
+	public String sendWhatsAppMessage(String to, String message) {
+		Twilio.init(accountSid, authToken);
+
+		// Use Twilio WhatsApp number for 'To' and 'From'
+		Message whatsappMessage = Message.creator(
+				new com.twilio.type.PhoneNumber("whatsapp:" + to),
+				new com.twilio.type.PhoneNumber("whatsapp:" + twilioWhatsappNumber),
+				message
+		).create();
+
+		System.out.println(whatsappMessage.getSid());
+		return to;
 	}
+
+	
+	
+	
+	//--------------------------------------------------Payment Gateway---------------------------------------------------------------------
+
+
+		@Value("${razorpay.api.key.id}")
+		private String keyId;
+
+		@Value("${razorpay.api.key.secret}")
+		private String keySecret;
+
+		public String createOrder(double amount, String currency) throws RazorpayException {
+			RazorpayClient razorpayClient = new RazorpayClient(keyId, keySecret);
+
+			JSONObject orderRequest = new JSONObject();
+			orderRequest.put("amount", amount * 100); // Convert to paisa
+			orderRequest.put("currency", currency);
+			orderRequest.put("receipt", "order_rcptid_" + System.currentTimeMillis());
+			// Add other order details as needed
+
+			Order order = razorpayClient.orders.create(orderRequest);
+
+			return order.get("id");
+		}
+
+	@Override
+	public void sendOTPByEmailToSubUser(String pan) throws UserNotFoundException {
+		CA_SubUsers panotp = caSubUsersRepo.findByPan1(pan);
+		Optional<User_RegistrationsForm> userpan = taskoRepository.findByPan(pan);
+
+		if (panotp != null) {
+			String otp = generateOTP();
+			panotp.setOtp(otp);
+			caSubUsersRepo.save(panotp);
+
+			String emailContent = "Your OTP is: " + otp;
+			sendEmail(panotp.getEmail(), "OTP Verification", emailContent);
+		}
+		else if (userpan.isPresent())
+		{
+			String otp = generateOTP();
+			User_RegistrationsForm userOtp = userpan.get();
+			userOtp.setOtp(otp);
+			taskoRepository.save(userOtp);
+
+			String emailContent = "Your OTP is: " + otp;
+			sendEmail(userOtp.getEmail(), "OTP Verification", emailContent);
+		} else {
+			throw new UserNotFoundException("User Not Found");
+		}
+	}
+
+	@Override
+	public void SubUserResetPassword(String otp, String newPassword) throws OtpNotVaild {
+		CA_SubUsers user = caSubUsersRepo.findByOtp(otp);
+		if (user == null)
+		{
+			throw new OtpNotVaild("Invaild OTP!");
+		}
+
+		// Update the password and clear the OTP
+		user.setPassword(passwordEncoder.encode(newPassword));
+		user.setOtp(null);
+		caSubUsersRepo.save(user);
+	}
+
+	@Override
+	public List<filed_NotfiledDTO> getFileCountsByUseridAndsubUserid(Long userid, Long subUserid) throws UserNotFoundException {
+		// Check if the account year is already present for the user
+		List<Long> clientIds = clientRepository.findClientIdByUserIdAndSubUserid(userid, subUserid);
+
+		if (clientIds.isEmpty()) {
+			throw new UserNotFoundException("Not Found!");
+		}
+
+		Calendar calendar = Calendar.getInstance();
+		int currentMonth = calendar.get(Calendar.MONTH) + 1; // Calendar.MONTH is zero-based
+
+		// Adjust the year based on the start of the new fiscal year (April)
+		int currentYear;
+		if (currentMonth >= 4) {
+			currentYear = calendar.get(Calendar.YEAR);
+		} else {
+			currentYear = calendar.get(Calendar.YEAR) - 1;
+		}
+
+		String currentYearStr = currentYear + "-" + (currentYear + 1) % 100; // Improved year formatting
+
+		for (Long clientId : clientIds) {
+			List<Filed_NotFiled> existingRecords = filed_notFiledRepo.findByClientid(clientId);
+
+			// Check if the list is not empty
+			if (!existingRecords.isEmpty()) {
+				System.out.println(existingRecords);
+
+				Filed_NotFiled existingRecord = filed_notFiledRepo.findByClientidAndAccountyear(clientId, currentYearStr);
+
+				if (existingRecord == null) {
+					// If not present, add it
+					Filed_NotFiled newRecord = new Filed_NotFiled();
+					newRecord.setUserid(userid);
+					newRecord.setAccountyear(currentYearStr);
+					newRecord.setClientid(clientId);
+					newRecord.setFilednotfiled("no"); // You can set the initial value as needed
+					newRecord.setCategory("Income_Tax");
+					filed_notFiledRepo.save(newRecord);
+				}
+			}
+		}
+		// Delete records for the last 5th year
+		int lastYearToDelete = currentYear - 5;
+		String yearToDeleteStr = String.valueOf(lastYearToDelete) + "-" + String.valueOf(lastYearToDelete + 1).substring(String.valueOf(lastYearToDelete).length() - 2);
+
+		List<Filed_NotFiled> recordsToDelete = filed_notFiledRepo.findByUseridAndAccountyear(userid, yearToDeleteStr);
+		for (Filed_NotFiled record : recordsToDelete)
+		{
+			filed_notFiledRepo.delete(record);
+		}
+
+		List<FileEntity> s3 = fileRepository.findByUseridAndAccountyear(userid, yearToDeleteStr);
+		for (FileEntity r : s3)
+		{
+			String s3Key = r.getFilePath(); // Get the file path from FileEntity
+
+			// Find the last index of '/' character
+			int lastIndex = s3Key.lastIndexOf('/');
+
+			// Extract the filename from the input string
+			String newVariable = s3Key.substring(lastIndex + 1);
+
+			// Delete the file from S3
+			amazonS3.deleteObject(new DeleteObjectRequest(bucketName, newVariable));
+		}
+
+		// Delete associated records from fileRepository
+		fileRepository.deleteByUseridAndAccountyear(userid, yearToDeleteStr);
+
+		// Now retrieve the counts for all account years
+		List<Object[]> results = filed_notFiledRepo.countFiledNotFiledByAccountyear(userid);
+		List<filed_NotfiledDTO> fileCountDTOs = new ArrayList();
+
+		for (Object[] result : results) {
+			String accountYear = (String) result[0];
+			Long filedCount = ((Number) result[1]).longValue();
+			Long notFiledCount = ((Number) result[2]).longValue();
+
+			// Assuming category is a property of Filed_NotFiled entity
+
+			filed_NotfiledDTO fileCountDTO = new filed_NotfiledDTO();
+			fileCountDTO.setAccountyear(accountYear);
+			fileCountDTO.setFiled(filedCount);
+			fileCountDTO.setNotfiled(notFiledCount);
+
+			fileCountDTOs.add(fileCountDTO);
+
+		}
+
+		return fileCountDTOs;
+	}
+
+	@Override
+	public Map<String, List<Map<String, Object>>> getGSTDataByCategoryAndSubUSerid(Long userid, Long subUserid)
+	{
+		Calendar calendar = Calendar.getInstance();
+		int financialYear = calendar.get(Calendar.YEAR);
+		String financialYearString = String.valueOf(financialYear);
+
+		List<Object[]> results = filed_GST_repo.getDataByCategoryAndSubUseridAndFinancialYear(userid,subUserid,financialYearString);
+
+		Map<String, List<Map<String, Object>>> dataByCategory = new LinkedHashMap<>();
+
+		for (Object[] result : results)
+		{
+			String category = (String) result[0];
+			String monthYear = (String) result[1];
+			Long filedCount = ((Number) result[2]).longValue();
+			Long notFiledCount = ((Number) result[3]).longValue();
+
+			Map<String, Object> entry = new HashMap<>();
+			entry.put("category", category);
+			entry.put("month", monthYear);
+			entry.put("filed", filedCount);
+			entry.put("notfiled", notFiledCount);
+
+			// Check if the category already exists in the map; if not, create a new list
+			dataByCategory.computeIfAbsent(category, k -> new ArrayList<>()).add(entry);
+		}
+
+		return dataByCategory;
+	}
+
+	@Override
+	public Map<String, Object> checkPanStatus(String pan) throws UserNotFoundException {
+		Map<String, Object> response = new HashMap<>();
+
+
+		Optional<Client_Registation_Form_Temp> tempResult = tempRepo.findByPan(pan);
+		Optional<Client_Registation_Form> formResult = clientRepository.findByPan(pan);
+
+		if (tempResult.isPresent()) {
+			response.put("Pan", tempResult.get().getPan());
+			response.put("Name", tempResult.get().getName());
+			response.put("Status", "True");
+		} else if (formResult.isPresent()) {
+			response.put("Pan", formResult.get().getPan());
+			response.put("Name", formResult.get().getName());
+			response.put("Status", "False");
+		}
+		else
+		{
+			throw new UserNotFoundException("Client Not Found");
+		}
+
+		return response;
+	}
+
+	@Override
+	public boolean changePassword(String username, String oldPassword, String newPassword)
+	{
+		master_admin admin = master_adminRepository.findByUsername(username);
+
+		if (admin != null && passwordEncoder.matches(oldPassword, admin.getPassword())) {
+			admin.setPassword(passwordEncoder.encode(newPassword));
+			master_adminRepository.save(admin);
+			return true;
+		}
+
+		return false;
+	}
+	@Override
+	public boolean isOldPasswordCorrect3(String username, String oldPassword)
+	{
+		Optional<master_admin> user = Optional.ofNullable(master_adminRepository.findByUsername(username));
+		master_admin user2 = user.get();
+		return BCrypt.checkpw(oldPassword, user2.getPassword());
+	}
+
+	@Override
+	public void updatePassword3(String username, String newPassword)
+	{
+		Optional<master_admin> user = Optional.ofNullable(master_adminRepository.findByUsername(username));
+		master_admin user2 = user.get();
+		user2.setPassword(BCrypt.hashpw(newPassword, BCrypt.gensalt()));
+		master_adminRepository.save(user2);
+	}
+
+
+	@Override
+	public void sendEmailinvite(String to, String subject, String body)
+	{
+		MimeMessage message = javaMailSender.createMimeMessage();
+
+		try {
+			MimeMessageHelper helper = new MimeMessageHelper(message, true);
+			// helper.setFrom("");
+			helper.setTo(to);
+			helper.setSubject(subject);
+			helper.setText(body);
+			javaMailSender.send(message);
+		} catch (MessagingException e) {
+			e.printStackTrace();
+			// Handle the exception appropriately
+		}
+	}
+}
 
 
 	

@@ -41,6 +41,11 @@ public class Subscriptionpack_history {
 	private String imagePath;
 	
 	private Long subscriptionprice;
+    private  String disrefrenceId;
+	
+	private  String salespersonId;
+	
+	private Long dissalespersonId;
 
 	public Long getId() {
 		return id;
@@ -130,23 +135,102 @@ public class Subscriptionpack_history {
 		this.subscriptionprice = subscriptionprice;
 	}
 
+	public String getDisrefrenceId() {
+		return disrefrenceId;
+	}
+
+	public void setDisrefrenceId(String disrefrenceId) {
+		this.disrefrenceId = disrefrenceId;
+	}
+
+	public String getSalespersonId() {
+		return salespersonId;
+	}
+
+	public void setSalespersonId(String salespersonId) {
+		this.salespersonId = salespersonId;
+	}
+
+	public Long getDissalespersonId() {
+		return dissalespersonId;
+	}
+
+	public void setDissalespersonId(Long dissalespersonId) {
+		this.dissalespersonId = dissalespersonId;
+	}
+
 	@Override
 	public String toString() {
-		return "Subscriptionpack_history [id=" + id + ", userid=" + userid + ", pan=" + pan + ", substartdate="
-				+ substartdate + ", substartdatebyadmin=" + substartdatebyadmin + ", subendtdate=" + subendtdate
-				+ ", subscriptiontype=" + subscriptiontype + ", acessclient=" + acessclient + ", imageName=" + imageName
-				+ ", imagePath=" + imagePath + ", subscriptionprice=" + subscriptionprice + ", getId()=" + getId()
-				+ ", getUserid()=" + getUserid() + ", getPan()=" + getPan() + ", getSubstartdate()=" + getSubstartdate()
-				+ ", getSubstartdatebyadmin()=" + getSubstartdatebyadmin() + ", getSubendtdate()=" + getSubendtdate()
-				+ ", getSubscriptiontype()=" + getSubscriptiontype() + ", getAcessclient()=" + getAcessclient()
-				+ ", getImageName()=" + getImageName() + ", getImagePath()=" + getImagePath()
-				+ ", getSubscriptionprice()=" + getSubscriptionprice() + ", getClass()=" + getClass() + ", hashCode()="
-				+ hashCode() + ", toString()=" + super.toString() + "]";
+		StringBuilder builder = new StringBuilder();
+		builder.append("Subscriptionpack_history [id=");
+		builder.append(id);
+		builder.append(", userid=");
+		builder.append(userid);
+		builder.append(", pan=");
+		builder.append(pan);
+		builder.append(", substartdate=");
+		builder.append(substartdate);
+		builder.append(", substartdatebyadmin=");
+		builder.append(substartdatebyadmin);
+		builder.append(", subendtdate=");
+		builder.append(subendtdate);
+		builder.append(", subscriptiontype=");
+		builder.append(subscriptiontype);
+		builder.append(", acessclient=");
+		builder.append(acessclient);
+		builder.append(", imageName=");
+		builder.append(imageName);
+		builder.append(", imagePath=");
+		builder.append(imagePath);
+		builder.append(", subscriptionprice=");
+		builder.append(subscriptionprice);
+		builder.append(", disrefrenceId=");
+		builder.append(disrefrenceId);
+		builder.append(", salespersonId=");
+		builder.append(salespersonId);
+		builder.append(", dissalespersonId=");
+		builder.append(dissalespersonId);
+		builder.append(", getId()=");
+		builder.append(getId());
+		builder.append(", getUserid()=");
+		builder.append(getUserid());
+		builder.append(", getPan()=");
+		builder.append(getPan());
+		builder.append(", getSubstartdate()=");
+		builder.append(getSubstartdate());
+		builder.append(", getSubstartdatebyadmin()=");
+		builder.append(getSubstartdatebyadmin());
+		builder.append(", getSubendtdate()=");
+		builder.append(getSubendtdate());
+		builder.append(", getSubscriptiontype()=");
+		builder.append(getSubscriptiontype());
+		builder.append(", getAcessclient()=");
+		builder.append(getAcessclient());
+		builder.append(", getImageName()=");
+		builder.append(getImageName());
+		builder.append(", getImagePath()=");
+		builder.append(getImagePath());
+		builder.append(", getSubscriptionprice()=");
+		builder.append(getSubscriptionprice());
+		builder.append(", getDisrefrenceId()=");
+		builder.append(getDisrefrenceId());
+		builder.append(", getSalespersonId()=");
+		builder.append(getSalespersonId());
+		builder.append(", getDissalespersonId()=");
+		builder.append(getDissalespersonId());
+		builder.append(", getClass()=");
+		builder.append(getClass());
+		builder.append(", hashCode()=");
+		builder.append(hashCode());
+		builder.append(", toString()=");
+		builder.append(super.toString());
+		builder.append("]");
+		return builder.toString();
 	}
 
 	public Subscriptionpack_history(Long id, Long userid, String pan, Date substartdate, Date substartdatebyadmin,
 			Date subendtdate, String subscriptiontype, Long acessclient, String imageName, String imagePath,
-			Long subscriptionprice) {
+			Long subscriptionprice, String disrefrenceId, String salespersonId, Long dissalespersonId) {
 		super();
 		this.id = id;
 		this.userid = userid;
@@ -159,17 +243,13 @@ public class Subscriptionpack_history {
 		this.imageName = imageName;
 		this.imagePath = imagePath;
 		this.subscriptionprice = subscriptionprice;
+		this.disrefrenceId = disrefrenceId;
+		this.salespersonId = salespersonId;
+		this.dissalespersonId = dissalespersonId;
 	}
 
 	public Subscriptionpack_history() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
-	
-	
-	
-	
-	
-	
-
 }

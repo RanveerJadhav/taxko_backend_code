@@ -1,7 +1,6 @@
 package com.Tasko.Registration.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-
 import jakarta.persistence.*;
 
 import java.util.Date;
@@ -14,6 +13,8 @@ public class Filed_NotFiled_GST
     private Long id;
 
     private Long userid;
+
+	private Long subUserid;
 
     private Long clientid;
 
@@ -43,6 +44,14 @@ public class Filed_NotFiled_GST
 
 	public void setUserid(Long userid) {
 		this.userid = userid;
+	}
+
+	public Long getSubUserid() {
+		return subUserid;
+	}
+
+	public void setSubUserid(Long subUserid) {
+		this.subUserid = subUserid;
 	}
 
 	public Long getClientid() {
@@ -93,11 +102,10 @@ public class Filed_NotFiled_GST
 		this.lastUpdateDate = lastUpdateDate;
 	}
 
-	public Filed_NotFiled_GST(Long id, Long userid, Long clientid, String category, String month, String financialYear,
-			String filednotfiled, Date lastUpdateDate) {
-		super();
+	public Filed_NotFiled_GST(Long id, Long userid, Long subUserid, Long clientid, String category, String month, String financialYear, String filednotfiled, Date lastUpdateDate) {
 		this.id = id;
 		this.userid = userid;
+		this.subUserid = subUserid;
 		this.clientid = clientid;
 		this.category = category;
 		this.month = month;
@@ -107,15 +115,20 @@ public class Filed_NotFiled_GST
 	}
 
 	public Filed_NotFiled_GST() {
-		super();
 	}
 
 	@Override
 	public String toString() {
-		return "Filed_NotFiled_GST [id=" + id + ", userid=" + userid + ", clientid=" + clientid + ", category="
-				+ category + ", month=" + month + ", financialYear=" + financialYear + ", filednotfiled="
-				+ filednotfiled + ", lastUpdateDate=" + lastUpdateDate + "]";
+		return "Filed_NotFiled_GST{" +
+				"id=" + id +
+				", userid=" + userid +
+				", subUserid=" + subUserid +
+				", clientid=" + clientid +
+				", category='" + category + '\'' +
+				", month='" + month + '\'' +
+				", financialYear='" + financialYear + '\'' +
+				", filednotfiled='" + filednotfiled + '\'' +
+				", lastUpdateDate=" + lastUpdateDate +
+				'}';
 	}
-    
-
 }

@@ -1,31 +1,7 @@
 package com.Tasko.Registration.Controller;
 
-import com.Tasko.Registration.Entity.ClientPass_Imgdetail;
-import com.Tasko.Registration.Entity.Client_Registation_Form;
-
-
-import com.Tasko.Registration.Entity.FileEntity;
-import com.Tasko.Registration.Entity.Filed_NotFiled;
-import com.Tasko.Registration.Entity.GST_FileUpload;
-import com.Tasko.Registration.Entity.Help;
-import com.Tasko.Registration.Entity.Invest_Now;
-import com.Tasko.Registration.Entity.Kyc_client_detail;
-import com.Tasko.Registration.Entity.Payment_Details;
-import com.Tasko.Registration.Entity.User_RegistrationsForm;
-import com.Tasko.Registration.Entity.authclient;
-import com.Tasko.Registration.Entity.docinfo;
-import com.Tasko.Registration.Repository.ClientPassRepository;
-import com.Tasko.Registration.Repository.ClientRepository;
-import com.Tasko.Registration.Repository.DocinfoRepository;
-import com.Tasko.Registration.Repository.FileRepository;
-import com.Tasko.Registration.Repository.Filed_NotFiledRepo;
-import com.Tasko.Registration.Repository.Filed_NotFiled_GST_repo;
-import com.Tasko.Registration.Repository.GST_FileUploadRepo;
-import com.Tasko.Registration.Repository.HelpRepository;
-import com.Tasko.Registration.Repository.Invest_NowRepository;
-import com.Tasko.Registration.Repository.KycclientRepository;
-import com.Tasko.Registration.Repository.TaskoRepository;
-import com.Tasko.Registration.Repository.paymentDetailsRepo;
+import com.Tasko.Registration.Entity.*;
+import com.Tasko.Registration.Repository.*;
 import com.Tasko.Registration.Service.JwtService;
 import com.Tasko.Registration.Service.TaskoService;
 import com.Tasko.Registration.dto.AuthRequestClient;
@@ -120,16 +96,65 @@ public class ClientMobileViewController
     @Autowired
     private HelpRepository helpRepository;
     
+    @Autowired
+    private Client_tally_backupfileRepository client_tally_backupfileRepository;
+
+    @Autowired
+    private Client_Registation_Form_Temp_Repo tempRepo;
+    
     
    Logger logger= LoggerFactory.getLogger(ClientMobileViewController.class);
    //  Logger logger=LoggerFactory.getLogger(UserController.class);
     
- ///////////////////////////////////////all inormation about user to fetch user to pan//////////////////////////////////////
-    @GetMapping("/pan")
-    public ResponseEntity<Map<String, Object>> getUsersByPan(@RequestParam("pan") String pan) 
+  ///////////////////////////////////////all inormation about user to fetch user to pan//////////////////////////////////////
+  @GetMapping("/pan")
+  public ResponseEntity<Map<String, Object>> getUsersByPan(@RequestParam("pan") String pan)
+  {
+      List<Client_Registation_Form> users = clientRepository.findByPan1(pan);
+      List<Client_Registation_Form_Temp> tempclient = tempRepo.findByPan1(pan);
+
+      if (!tempclient.isEmpty())
+      {
+          Map<String, Object> r = new HashMap<>();
+          r.put("users", tempclient);
+          return ResponseEntity.ok(r);
+      }
+
+
+      if (!users.isEmpty()) {
+          // Create a map to hold multiple values in the response
+          Map<String, Object> response = new HashMap<>();
+          response.put("users", users);
+          int mapSize = response.size();
+
+//            if (mapSize == 2) {
+//                // Return an error response with a specific status code, such as 400 Bad Request
+//                return ResponseEntity.badRequest().build();
+          //           }
+          if (mapSize == 1)
+          {
+              // Return a successful response with the map containing user data
+              return ResponseEntity.ok(response);
+          }
+          else
+          {
+              // You can add additional values to the response map if needed
+              // response.put("someOtherData", someOtherData);
+
+              // Return an error response with a specific status code, such as 400 Bad Request
+              return ResponseEntity.badRequest().build();
+          }
+      } else {
+          // Return a not found response
+          return ResponseEntity.notFound().build();
+      }
+  }
+    /////////////////this api remove autorizAation//////////////////////////
+    @GetMapping("/taxreturn/pan")
+    public ResponseEntity<Map<String, Object>> getUsersByPan2(@RequestParam("pan") String pan) 
     {
         List<Client_Registation_Form> users = clientRepository.findByPan1(pan);
-
+   
         if (!users.isEmpty()) {
             // Create a map to hold multiple values in the response
             Map<String, Object> response = new HashMap<>();
@@ -159,6 +184,7 @@ public class ClientMobileViewController
         }
     }
 
+
     //----------------------------------check client password status---------------------------------------------------
 //    @PostMapping("/client/isPasswordNull")
 //    public ResponseEntity<Map<String, Object>> checkPassword(@RequestBody SetClientPassword setClientPassword) {
@@ -182,25 +208,43 @@ public class ClientMobileViewController
   //-----------------------------check client password status new--------------------------------//
     
     // @PostMapping("/clientnew/isPasswordNull")
-     @PostMapping("/client/isPasswordNull")
-     public ResponseEntity<Map<String, Object>> checkPassword1(@RequestBody SetClientPassword setClientPassword) {
-         Optional<ClientPass_Imgdetail> check = clientPassRepository.findByPan(setClientPassword.getPan());
+    @PostMapping("/client/isPasswordNull")
+    public ResponseEntity<Map<String, Object>> checkPassword1(@RequestBody SetClientPassword setClientPassword)
+    {
+        Optional<ClientPass_Imgdetail> check = clientPassRepository.findByPan(setClientPassword.getPan());
 
-         if (check.isPresent()) {
-             ClientPass_Imgdetail client = check.get();
-             boolean isPasswordNull = client.getPassword() == null;
+        Optional<Client_Registation_Form_Temp> temppan=tempRepo.findByPan(setClientPassword.getPan());
 
-             logger.info("Password check for PAN {}: Is password null? {}", setClientPassword.getPan(), isPasswordNull);
+        if (temppan.isPresent()) {
+            Client_Registation_Form_Temp client = temppan.get();
+            boolean isPasswordNull = client.getPassword() == null;
 
-             Map<String, Object> response = new HashMap<>();
-             response.put("isPasswordNull", isPasswordNull);
+            logger.info("Password check for PAN {}: Is password null? {}", setClientPassword.getPan(), isPasswordNull);
 
-             return ResponseEntity.ok(response);
-         } else {
-             logger.warn("Password check failed for PAN: {}", setClientPassword.getPan());
-             return ResponseEntity.notFound().build();
-         }
-     }
+            Map<String, Object> response = new HashMap<>();
+            response.put("isPasswordNull", isPasswordNull);
+            response.put("TableName", "Temp");
+
+            return ResponseEntity.ok(response);
+        }
+
+        if (check.isPresent()) {
+            ClientPass_Imgdetail client = check.get();
+            boolean isPasswordNull = client.getPassword() == null;
+
+            logger.info("Password check for PAN {}: Is password null? {}", setClientPassword.getPan(), isPasswordNull);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("isPasswordNull", isPasswordNull);
+            response.put("TableName", "ClientReg");
+
+            return ResponseEntity.ok(response);
+        }
+        else {
+            logger.warn("Password check failed for PAN: {}", setClientPassword.getPan());
+            return ResponseEntity.notFound().build();
+        }
+    }
 
    //-----------------------------------set image client in s3 bucke an save path-------------------------------------------//
      @PutMapping("/client/uploadimage")
@@ -329,45 +373,112 @@ public class ClientMobileViewController
     }
 
     //--------------------------------------.0. Page-------------------------------------------------------------
+//    @PostMapping("/client/authenticate")
+//    public ResponseEntity<Object> authenticateAndGetClientToken(@RequestBody AuthRequestClient authRequestClient) {
+//
+//        try {
+//            String clientPAN = authRequestClient.getClientusername();
+//            Optional<ClientPass_Imgdetail> client = clientPassRepository.findByPan(clientPAN);
+//
+//            if (client.isPresent()) {
+//                // Replace the PAN with the actual username from the retrieved client
+//                String clientUsername = client.get().getPan();
+//                String clientPassword = authRequestClient.getClientpassword();
+//
+//                Authentication authenticationClient = authenticationManager.authenticate(
+//                    new UsernamePasswordAuthenticationToken(clientUsername, clientPassword));
+//
+//                if (authenticationClient.isAuthenticated()) {
+//                    System.out.println("get Client");
+//                    String jwt = jwtService.generateToken(clientUsername);
+//
+//                    authclient response = new authclient();
+//                    response.setToken(jwt);
+////                    response.setClient(client);
+//
+//                    logger.info("User {} has been authenticated successfully.", clientPAN);
+//                    return ResponseEntity.ok(response);
+//               }
+//            } else {
+//                throw new Exception("Client Not Found");
+//            }
+//        } catch (Exception e) {
+//            logger.error("Authentication failed for user {}: {}", authRequestClient.getClientusername(), e.getMessage());
+//            return ResponseEntity
+//                .status(HttpStatus.UNAUTHORIZED)
+//                .body(e.getMessage());
+//        }
+//
+//        // Return an unauthorized response for unexpected cases
+//       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication Failed");
+//    }
+    //-----------------------------------------Login------------------------------------------------
     @PostMapping("/client/authenticate")
-    public ResponseEntity<Object> authenticateAndGetClientToken(@RequestBody AuthRequestClient authRequestClient) {
-        
+    public ResponseEntity<Object> authenticateAndGetClientToken(@RequestBody AuthRequestClient authRequestClient)
+    {
         try {
             String clientPAN = authRequestClient.getClientusername();
-            Optional<ClientPass_Imgdetail> client = clientPassRepository.findByPan(clientPAN);
 
-            if (client.isPresent()) {
-                // Replace the PAN with the actual username from the retrieved client
-                String clientUsername = client.get().getPan();
+            // Check in ClientPass_Imgdetail table
+            Optional<ClientPass_Imgdetail> clientPass = clientPassRepository.findByPan(clientPAN);
+
+            if (clientPass.isPresent()) {
+                String clientUsername = clientPass.get().getPan();
                 String clientPassword = authRequestClient.getClientpassword();
 
+                // Authenticate using ClientPass_Imgdetail credentials
                 Authentication authenticationClient = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(clientUsername, clientPassword));
+                        new UsernamePasswordAuthenticationToken(clientUsername, clientPassword));
 
-                if (authenticationClient.isAuthenticated()) {
-                    System.out.println("get Client");
+                if (authenticationClient.isAuthenticated())
+                {
+                    System.out.println("Authentication successful for ClientPass_Imgdetail");
                     String jwt = jwtService.generateToken(clientUsername);
 
                     authclient response = new authclient();
                     response.setToken(jwt);
-//                    response.setClient(client);
+                    //         response.setClient(clientPass); // Set relevant client information
+                    logger.info("User {} has been authenticated successfully.", clientPAN);
+                    return ResponseEntity.ok(response);
+                }
+            }
+
+            // Check in Client_Registation_Form_Temp table
+            Optional<Client_Registation_Form_Temp> clientTemp = tempRepo.findByPan(clientPAN);
+
+            if (clientTemp.isPresent()) {
+                String tempclientUsername = clientTemp.get().getPan();
+                String clientPassword = authRequestClient.getClientpassword();
+
+                // Authenticate using Client_Registation_Form_Temp credentials
+                Authentication authenticationTemp = authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(tempclientUsername, clientPassword));
+
+                if (authenticationTemp.isAuthenticated())
+                {
+                    System.out.println("Authentication successful for Client_Registation_Form_Temp");
+                    String jwt = jwtService.generateToken(tempclientUsername);
+
+                    authclient response = new authclient();
+                    response.setToken(jwt);
+                    //             response.setTempClient(clientTemp);
 
                     logger.info("User {} has been authenticated successfully.", clientPAN);
                     return ResponseEntity.ok(response);
-               }
-            } else {
-                throw new Exception("Client Not Found");
+                }
             }
+
+            throw new Exception("Client Not Found");
         } catch (Exception e) {
             logger.error("Authentication failed for user {}: {}", authRequestClient.getClientusername(), e.getMessage());
             return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
-                .body(e.getMessage());
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(e.getMessage());
         }
-
-        // Return an unauthorized response for unexpected cases
-       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication Failed");
     }
+
+
+
 
 
 
@@ -1431,6 +1542,7 @@ public String sendEmail(
 @RequestParam  Long userid,
 @RequestParam String subject,
 @RequestParam String category,
+@RequestParam String mobile,
 @RequestBody String body
 ) 
 {
@@ -1453,9 +1565,10 @@ public String sendEmail(
  investdetail.setDate(new Date());
  investdetail.setCategory(category);
  investdetail.setName(clientdata.getName());
- if(userdata.getInvestNow_Email()!=null)
+ investdetail.setMobile(mobile);
+ if(clientdata.getInvest_now_email()!=null)
  {
-	 investdetail.setInvestNow_Email(userdata.getInvestNow_Email());
+	 investdetail.setInvestNow_Email(clientdata.getInvest_now_email());
  }
  else
  {
@@ -1465,9 +1578,9 @@ public String sendEmail(
 
  List<String> recipientEmails = new ArrayList<>();
  recipientEmails.add(userdata.getEmail());
-if(userdata.getInvestNow_Email()!=null)
+if(clientdata.getInvest_now_email()!=null)
 {
-  recipientEmails.add(userdata.getInvestNow_Email());
+  recipientEmails.add(clientdata.getInvest_now_email());
 }
 for (String to : recipientEmails) {
     taskoService.sendEmailwithattachment(to, subject, body);
@@ -1492,7 +1605,7 @@ public String sendEmailhelp(
 
  logger.info("Client with ID {} for user ID {} has been fetched.", clientid, userid);
 
- String from=clientdata.getEmail();;
+ String from=clientdata.getEmail();
 
  Optional<User_RegistrationsForm> user = taskoRepository.findById(userid);
 
@@ -2373,4 +2486,211 @@ public ResponseEntity<Timestamp> findDateByClientIdAndCategory(
     }
 }
 
+/////////////////////////////////upload Tally backup file for client/////////////////////////////////////
+@PostMapping("/client/upload/tallybackupfile")
+public ResponseEntity<Object> clientuploadtallybackupfile(
+@RequestParam String pan,
+@RequestParam(value = "imagePathBackupfile", required = false) MultipartFile imagePathBackupfile) {
+try {
+	Client_tally_backupfile data=new Client_tally_backupfile();
+data.setPan(pan);
+data.setDate(new Date());
+if (!imagePathBackupfile.isEmpty()) {
+String name = imagePathBackupfile.getOriginalFilename();
+String[] result = name.split("\\.");
+String fileExtension = result[result.length - 1];
+String fileNameWithoutExtension = name.substring(0, name.length() - (fileExtension.length() + 1)); // Add 1 to account for the dot
+System.out.println("File Name without Extension: " + fileNameWithoutExtension);
+ObjectMetadata metadata = new ObjectMetadata();
+metadata.setContentType(imagePathBackupfile.getContentType());
+InputStream inputStream = imagePathBackupfile.getInputStream();
+String filename = generateUniqueFiletally(pan,fileNameWithoutExtension);
+String s3Key = filename + "." + fileExtension;
+//    amazonS3.putObject(new PutObjectRequest(bucketName, s3Key, inputStream, metadata));
+
+
+
+// String s4Key = imageName;
+
+// Check if the object with the same key exists in the S3 bucket
+if (amazonS3.doesObjectExist(bucketName, s3Key)) {
+// If it exists, delete it
+amazonS3.deleteObject(bucketName, s3Key);
+}
+
+// Upload the new object
+amazonS3.putObject(new PutObjectRequest(bucketName, s3Key, inputStream, metadata));
+
+data.setImageNameBackupfile(name);
+data.setImagePathBackupfile("s3://" + bucketName + "/" + s3Key);
+
+}
+// Save the updated payment details
+client_tally_backupfileRepository.save(data);
+
+return ResponseEntity.ok("Upload Sucessfully!");
+} catch (Exception e) {
+// Handle exceptions here, log them, and return an error response
+e.printStackTrace(); // Log the exception for debugging
+return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error "
++ "ing image");
+}
+}
+private String generateUniqueFiletally(String pan,String fileNameWithoutExtension) {
+return pan +"Client"+ "_" +"tally"+ "_" +"backup" + "_" + fileNameWithoutExtension;
+}
+
+
+//////////////////////////update Tally backup file for client ////////////////////////////////////
+
+@PutMapping("/client/update/tallybackupfile")
+public ResponseEntity<Object> cleitnupdatetallybackupfile(
+@RequestParam String pan,
+@RequestParam(value = "imagePathBackupfile", required = false) MultipartFile imagePathBackupfile) {
+try {
+Optional<Client_tally_backupfile> tallydata= client_tally_backupfileRepository.findByPan(pan);
+Client_tally_backupfile data=tallydata.get();
+if (!imagePathBackupfile.isEmpty()) { 	  
+String name = imagePathBackupfile.getOriginalFilename();
+String[] result = name.split("\\.");
+String fileExtension = result[result.length - 1];
+String fileNameWithoutExtension = name.substring(0, name.length() - (fileExtension.length() + 1)); // Add 1 to account for the dot
+System.out.println("File Name without Extension: " + fileNameWithoutExtension);
+ObjectMetadata metadata = new ObjectMetadata();
+metadata.setContentType(imagePathBackupfile.getContentType());
+InputStream inputStream = imagePathBackupfile.getInputStream();
+String filename = generateUniqueFiletally(data.getPan(),fileNameWithoutExtension);
+String s3Key = filename + "." + fileExtension;
+//    amazonS3.putObject(new PutObjectRequest(bucketName, s3Key, inputStream, metadata));
+
+
+
+// String s4Key = imageName;
+
+// Check if the object with the same key exists in the S3 bucket
+if (amazonS3.doesObjectExist(bucketName, s3Key)) {
+// If it exists, delete it
+amazonS3.deleteObject(bucketName, s3Key);
+}
+
+// Upload the new object
+amazonS3.putObject(new PutObjectRequest(bucketName, s3Key, inputStream, metadata));
+
+data.setImageNameBackupfile(name);
+data.setImagePathBackupfile("s3://" + bucketName + "/" + s3Key);
+
+}
+data.setDate(new Date());
+// Save the updated payment details
+client_tally_backupfileRepository.save(data);
+
+return ResponseEntity.ok("Upload Sucessfully!");
+} catch (Exception e) {
+// Handle exceptions here, log them, and return an error response
+e.printStackTrace(); // Log the exception for debugging
+return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error "
++ "ing image");
+}
+}
+
+//////////////////////////////////////////////////////////delete user tally backupfile//////////////////////////////////////////
+@PutMapping("/client/delete/clientbackupfile")
+public ResponseEntity<String> deleteclienttally(@RequestParam String pan) {
+try {
+//Check if the client with the given PAN exists
+	Optional<Client_tally_backupfile> tallydata= client_tally_backupfileRepository.findByPan(pan);
+if (!tallydata.isPresent()) {
+return ResponseEntity.notFound().build();
+}
+Client_tally_backupfile existingPaymentDetails=tallydata.get();
+String s3Key = getS3KeyFromFilePath(existingPaymentDetails.getImagePathBackupfile());
+
+//Check if the object with the same key exists in the S3 bucket
+if (amazonS3.doesObjectExist(bucketName, s3Key)) {
+//If it exists, delete it
+amazonS3.deleteObject(bucketName, s3Key);
+}
+
+//Modify the specific column you want to delete
+existingPaymentDetails.setImageNameBackupfile(null); // Set it to null, assuming you want to "delete" it.
+existingPaymentDetails.setImagePathBackupfile(null);
+
+//Save the updated entity back to the database
+client_tally_backupfileRepository.save(existingPaymentDetails);
+
+return ResponseEntity.ok("deleted successfully.");
+} catch (Exception e) {
+//Handle exceptions here
+return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update: " + e.getMessage());
+}
+}
+
+
+/////////////////////////////////////////////////////get backupfile client////////////////////////////////////////////////////
+@GetMapping("/getclientbackupfile/{pan}")
+public ResponseEntity<?> getclienttallybackup(@PathVariable String pan) {
+
+Optional<Client_tally_backupfile> tallydata= client_tally_backupfileRepository.findByPan(pan);
+
+if (tallydata.isPresent()) {
+Client_tally_backupfile clientDetails = tallydata.get();
+String s3Key = getS3KeyFromFilePath(clientDetails.getImagePathBackupfile());
+try {
+//Fetch the file content from S3
+S3Object s3Object = amazonS3.getObject(bucketName, s3Key);
+
+//Get the S3 object content
+InputStream s3InputStream = s3Object.getObjectContent();
+byte[] content = IOUtils.toByteArray(s3InputStream);
+
+//Close the S3 object and release resources
+s3InputStream.close();
+s3Object.close();
+
+//Create an InputStreamResource from the byte array content
+InputStreamResource resource = new InputStreamResource(new ByteArrayInputStream(content));
+
+//Set up headers for the response
+HttpHeaders headers = new HttpHeaders();
+headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+headers.setContentDisposition(ContentDisposition.attachment().filename(clientDetails.getImagePathBackupfile()).build());
+
+//Create a response map with both paymentDetails and content
+
+Map<String, Object> responseMap = new HashMap<>();
+//responseMap.put("paymentDetails", clientDetails);
+responseMap.put("content",content);
+responseMap.put("content",resource);
+
+return ResponseEntity.ok()
+.headers(headers)
+.body(resource);
+
+//Return ResponseEntity with headers and content length
+
+} catch (AmazonS3Exception e) {
+//Handle S3 exception (e.g., object not found)
+logger.error("Error fetching payment details from S3: {}", e.getMessage());
+return ResponseEntity.notFound().build();
+} catch (IOException e) {
+//Handle IO exception
+logger.error("Error reading payment details from S3: {}", e.getMessage());
+return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+}
+} else {
+logger.warn(" details not found for userid: {}", pan);   
+return ResponseEntity.notFound().build();
+}
+}
+/////////////////////////////////get all userbackupfile detail information/////////////////////////////////////////////
+@GetMapping("/getcleintbackupfiledetail/{pan}")
+public ResponseEntity<Client_tally_backupfile> getDistributorDetail(@PathVariable String pan) {
+Optional<Client_tally_backupfile> tallydata= client_tally_backupfileRepository.findByPan(pan);
+if (tallydata.isPresent()) {
+Client_tally_backupfile distributorDetails = tallydata.get();
+return ResponseEntity.ok().body(distributorDetails);
+} else {
+return ResponseEntity.ok().body(null);
+}
+}
 }
